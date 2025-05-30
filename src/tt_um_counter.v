@@ -14,7 +14,7 @@ module tt_um_counter (
     wire oe_n = ui_in[1]; // Using second UI input for output enable
     
     // Instantiate your counter
-    programmable_counter counter (
+    counter counter_inst (
         .clk(clk),
         .reset(reset),
         .load(load),
