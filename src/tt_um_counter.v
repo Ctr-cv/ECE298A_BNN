@@ -1,49 +1,35 @@
-module counter (
-    input wire clk,
-    input wire reset,
-    input wire load,
-    input wire oe_n,
-    input wire [7:0] data,
-    output wire [7:0] count
-);
-    reg [7:0] counter_reg;
-    
-    always @(posedge clk or posedge reset) begin
-        if (reset) counter_reg <= 8'b0;
-        else if (load) counter_reg <= data;
-        else counter_reg <= counter_reg + 1;
-    end
-    
-    assign count = (~oe_n) ? counter_reg : 8'bz;
-endmodule
-
 module tt_um_counter (
-    input  wire [7:0] ui_in,
-    output wire [7:0] uo_out,
-    input  wire [7:0] uio_in,
-    output wire [7:0] uio_out,
-    output wire [7:0] uio_oe,
-    input  wire       ena,
-    input  wire       clk,
-    input  wire       rst_n
+    input  wire [7:0] ui_in,    // Dedicated inputs
+    output wire [7:0] uo_out,   // Dedicated outputs
+    input  wire [7:0] uio_in,   // IOs: Input path
+    output wire [7:0] uio_out,  // IOs: Output path
+    output wire [7:0] uio_oe,   // IOs: Enable path
+    input  wire       ena,      // Enable
+    input  wire       clk,      // Clock
+    input  wire       rst_n     // Active-low reset
 );
-    // Signal mapping
-    wire reset = ~rst_n;
-    wire load = ui_in[0];
-    wire oe_n = ui_in[1];
-    wire [7:0] data = ui_in[7:2];
-    
-    // Instantiation
-    counter counter_inst (
-        .clk(clk),
-        .reset(reset),
-        .load(load),
-        .oe_n(oe_n),
-        .data(data),
-        .count(uo_out)
-    );
-    
-    // Set unused outputs
+    // Internal signals
+    reg [7:0] counter_reg;
+    wire reset = ~rst_n;       // Convert to active-high reset
+    wire load = ui_in[0];      // Load control
+    wire oe_n = ui_in[1];      // Output enable (active low)
+    wire [7:0] data = ui_in[7:2]; // Data input
+
+    // Counter logic
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            counter_reg <= 8'b0;
+        end else if (load) begin
+            counter_reg <= data;
+        end else if (ena) begin  // Only count when enabled
+            counter_reg <= counter_reg + 1;
+        end
+    end
+
+    // Output with tri-state control
+    assign uo_out = (~oe_n) ? counter_reg : 8'bz;
+
+    // Tie off unused outputs
     assign uio_out = 8'b0;
-    assign uio_oe = 8'b0;
+    assign uio_oe = 8'b0;  // Set all IOs as inputs
 endmodule
