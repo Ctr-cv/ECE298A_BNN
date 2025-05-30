@@ -11,16 +11,16 @@ You can also include images in this folder and reference them in the markdown. E
 
 Explain how your project works
 
-random stuff here
+This current project is a sample 8-bit counter that supports tri-state output
 
 ## How to test
 
-Explain how to use your project
+Test is done using CocoTB, check the description in test/readme.MD
 
-stuff stuff
+Some fillers here
 
 ## External hardware
 
 List external hardware used in your project (e.g. PMOD, LED display, etc), if any
 
-stuff stuff
+No additional hardwares are used in this project.
