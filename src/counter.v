@@ -1,4 +1,4 @@
-module programmable_counter (
+module counter (
     input wire clk,          // Clock input
     input wire reset,       // Active-high reset
     input wire load,        // Active-high load control
