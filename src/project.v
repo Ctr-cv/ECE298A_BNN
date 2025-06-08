@@ -15,14 +15,18 @@ module tt_um_counter (
     input  wire       clk,      // Clock
     input  wire       rst_n     // Active-low reset
 );
+
+    // Bit 0: value load control bit
+    // Bit 1: Enable output control bit
+    // bit 2: Enable counting control bit
+    // bit 3-7: Load value data bits
+    
     reg [7:0] counter_reg;
     wire reset = ~rst_n;       // Active-high reset
     wire load = ui_in[0];      // Load control
     wire enable = ui_in[1];      // Output enable control
     wire count_up = ui_in[2];   // Enable count control
     wire [7:0] data = {ui_in[7:3], 2'b0}; // Loading data (6-bits, multiples of 8, maxes at 248)
-
-    assign uo_out = counter_reg; // Link dedicated output to counter
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
