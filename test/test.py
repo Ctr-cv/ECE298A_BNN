@@ -48,20 +48,12 @@ async def test_tt_um_counter(dut):
     dut.ui_in.value = 0b01100000  # count_up=1, output_en=1, load=0
     await ClockCycles(dut.clk, 3)
 
-    # Read after count up
-    dut.ui_in.value = 0b01100000  # keep output_en=1
-    await ClockCycles(dut.clk, 1)
-
     assert dut.uo_out.value.integer == 19, f"Expected counter 19 after 3 up counts, got {dut.uo_out.value}"
 
     # Count down for 2 cycles
     dut._log.info("Count down for 2 cycles")
     dut.ui_in.value = 0b01000000  # count_up=0, output_en=1
     await ClockCycles(dut.clk, 2)
-
-    # Read after count down
-    dut.ui_in.value = 0b01000000  # output_en=1
-    await ClockCycles(dut.clk, 1)
 
     assert dut.uo_out.value.integer == 17, f"Expected counter 17 after 2 down counts, got {dut.uo_out.value}"
 
