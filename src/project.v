@@ -24,9 +24,9 @@ module tt_um_counter (
     reg [7:0] counter_reg;
     wire reset = ~rst_n;       // Active-high reset
     wire load = ui_in[0];      // Load control
-    wire enable = ui_in[1];      // Output enable control (actve 
-    wire count_up = ui_in[2];   // Count control (1 = count up, 0 = hold)
-    wire [7:0] data = {ui_in[7:3], 2'b0}; // Loading data (6-bits, multiples of 8, maxes at 248)
+    wire output_en = ui_in[1];      // Output enable control (actve 
+    wire count_up = ui_in[2];   // Count control (1 = count up, 0 = count down)
+    wire [7:0] data = {ui_in[7:3], 3'b0}; // Loading data (6-bits, multiples of 8, maxes at 248)
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -35,11 +35,12 @@ module tt_um_counter (
             counter_reg <= data;  // Load on rising edge of 'load'
         end else if (count_up) begin
             counter_reg <= counter_reg + 1;  // Count up 
-        end else begin
+        end else if (!count_up) begin
             counter_reg <= counter_reg - 1;  // else count down
+        end
     end
 
-    assign uo_out = (enable) ? counter_reg : 8'bZ;  // Tri-state, active high output
+    assign uo_out = (output_en) ? counter_reg : 8'bZ;  // Tri-state, active high output
 
     // Unused I/Os here
     wire _unused = &{ena, uio_oe, uio_in, uio_out, 1'b0}; 
