@@ -3,84 +3,76 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge
-from cocotb.types import LogicArray
+from cocotb.triggers import ClockCycles
+
 
 @cocotb.test()
-async def test_programmable_counter(dut):
-    """Test the programmable counter module"""
-    
-    # Start 100 KHz clock
+async def test_tt_um_counter(dut):
+    dut._log.info("Starting tt_um_counter test")
+
+    # Clock setup: 10 us period (100 kHz)
     clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
 
-    # Initialize inputs
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 1  # Active low reset (start deasserted)
-
-    dut._log.info("=== Test 1: Reset Behavior ===")
-    # Apply reset
+    # Reset sequence
     dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 2)
+    dut.ui_in.value = 0
+    dut.ena.value = 1
+    dut.uio_in.value = 0
+    dut.uio_oe.value = 0
+    dut.uio_out.value = 0
+    await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
-    
-    # Check counter is zero after reset
-    assert dut.uo_out.value == 0, "Counter not reset to zero"
-    dut._log.info("Reset test passed")
+    await ClockCycles(dut.clk, 1)
 
-    dut._log.info("=== Test 2: Counting Operation ===")
-    # Let counter run for 10 cycles
-    for i in range(1, 11):
-        await RisingEdge(dut.clk)
-        assert dut.uo_out.value == i % 256, f"Counter not incrementing correctly at cycle {i}"
-    dut._log.info("Counting test passed")
+    # After reset, counter should be zero
+    dut._log.info("Checking counter reset")
+    assert dut.uo_out.value.integer == 0, f"Expected counter 0 after reset, got {dut.uo_out.value.integer}"
 
-    dut._log.info("=== Test 3: Load Operation ===")
-    # Prepare load value (0x55) and activate load
-    load_value = 0x55
-    dut.ui_in.value = (1 << 0) | (load_value << 2)  # Set load bit (ui_in[0]) and data (ui_in[7:2])
-    await RisingEdge(dut.clk)
-    
-    # Deassert load
-    dut.ui_in.value = 0
-    await RisingEdge(dut.clk)
-    
-    # Verify loaded value
-    assert dut.uo_out.value == load_value, f"Counter not loaded with {hex(load_value)}"
-    dut._log.info("Load test passed")
+    # Load a value into the counter: load = 1 (bit 0), output_en=1 (bit1), count_up don't care here
+    # Load data: 5 << 2 = 20, so ui_in bits [7:3] = 5 (0b00101)
+    # ui_in: bit7..3=0b00101, bit2=0 (count direction), bit1=1 (output enable), bit0=1 (load)
+    load_value = 5
+    ui_in_val = (load_value << 3) | (1 << 1) | (1 << 0)  # bits 7:3 = load_value, bit1=output_en=1, bit0=load=1
+    dut._log.info(f"Loading value {load_value} (effective counter load = {load_value << 2})")
+    dut.ui_in.value = ui_in_val
+    await ClockCycles(dut.clk, 2)  # Wait 2 cycles to register load
 
-    dut._log.info("=== Test 4: Output Enable ===")
-    # First check output is enabled (oe_n=1 means output is enabled in our wrapper)
-    assert dut.uo_out.value == load_value + 1, "Output not enabled when it should be"
-    
-    # Disable output (set oe_n=0 through ui_in[1])
-    dut.ui_in.value = (1 << 1)
-    await RisingEdge(dut.clk)
-    
-    # Check output is high-Z (represented as 'X' in simulation)
-    assert LogicArray(dut.uo_out.value).is_X, "Output not high-Z when disabled"
-    
-    # Re-enable output
-    dut.ui_in.value = 0
-    await RisingEdge(dut.clk)
-    dut._log.info("Output enable test passed")
+    # Check counter loaded value (shifted left by 2)
+    expected_load = load_value << 2
+    actual = dut.uo_out.value.integer
+    assert actual == expected_load, f"Counter load failed: expected {expected_load}, got {actual}"
 
-    dut._log.info("=== Test 5: Combined Operations ===")
-    # Test combination of operations
-    test_value = 0xAA
-    dut.ui_in.value = (1 << 0) | (test_value << 2)  # Load new value
-    await RisingEdge(dut.clk)
-    dut.ui_in.value = 0  # Return to counting mode
-    await RisingEdge(dut.clk)
-    
-    # Verify counting continues from loaded value
-    assert dut.uo_out.value == test_value + 1, "Counter not incrementing after load"
-    
-    # Let it count a few more cycles
-    for i in range(2, 5):
-        await RisingEdge(dut.clk)
-        assert dut.uo_out.value == (test_value + i) % 256, "Counter not incrementing correctly"
-    
-    dut._log.info("All tests passed successfully!")
+    # Count up for 3 cycles: load=0, output_en=1, count_up=1
+    dut.ui_in.value = (1 << 2) | (1 << 1)  # bit2=count_up=1, bit1=output_en=1, bit0=0 load
+    dut._log.info("Counting up for 3 cycles")
+    await ClockCycles(dut.clk, 3)
+
+    expected_count = expected_load + 3
+    actual = dut.uo_out.value.integer
+    assert actual == expected_count, f"Count up failed: expected {expected_count}, got {actual}"
+
+    # Count down for 2 cycles: load=0, output_en=1, count_up=0
+    dut.ui_in.value = (0 << 2) | (1 << 1)  # bit2=count_up=0, bit1=output_en=1, bit0=0 load
+    dut._log.info("Counting down for 2 cycles")
+    await ClockCycles(dut.clk, 2)
+
+    expected_count -= 2
+    actual = dut.uo_out.value.integer
+    assert actual == expected_count, f"Count down failed: expected {expected_count}, got {actual}"
+
+    # Disable output enable: output_en=0, counter keeps counting but output is high Z
+    dut.ui_in.value = 0  # all bits 0: load=0, output_en=0, count_up=0
+    dut._log.info("Output disabled (tri-state), counter should decrement but output is Z")
+    await ClockCycles(dut.clk, 1)
+    # uo_out should be 'Z' (high impedance)
+    assert dut.uo_out.value.is_resolvable is False, "Output enable disabled, uo_out should be high impedance"
+
+    # Enable output again, verify counter decremented
+    dut.ui_in.value = (0 << 2) | (1 << 1)  # output_en=1, count_up=0
+    await ClockCycles(dut.clk, 1)
+    expected_count -= 1
+    actual = dut.uo_out.value.integer
+    assert actual == expected_count, f"Counter value mismatch after re-enabling output: expected {expected_count}, got {actual}"
+
+    dut._log.info("All tests passed!")
