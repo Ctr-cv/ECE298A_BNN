@@ -34,7 +34,7 @@ async def test_tt_um_counter(dut):
 
     # Load value 40 (5 << 3)
     dut._log.info("Load 40 into the counter")
-    dut.ui_in.value = 0b10010101  # load=1, output_en=0, count_up=1, data=0b10101 → 0b10101000 = 40
+    dut.ui_in.value = 0b10101001  # load=1, output_en=0, count_up=1, data=0b10101 → 0b10101000 = 40
     await ClockCycles(dut.clk, 1)
 
     # Enable output to read value
