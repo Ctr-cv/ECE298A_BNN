@@ -23,10 +23,10 @@ module tt_um_counter (
     
     reg [7:0] counter_reg;
     wire reset = ~rst_n;       // Active-high reset
-    wire load = ui_in[0];      // Load control
-    wire output_en = ui_in[1];      // Output enable control (actve 
-    wire count_up = ui_in[2];   // Count control (1 = count up, 0 = count down)
-    wire [7:0] data = {ui_in[7:3], 3'b0}; // Loading data (6-bits, multiples of 8, maxes at 248)
+    wire load = ui_in[7];      // Load control
+    wire output_en = ui_in[6];      // Output enable control (actve 
+    wire count_up = ui_in[5];   // Count control (1 = count up, 0 = count down)
+    wire [7:0] data = {3'b0, ui_in[4:0]}; // Loading data (5-bits, maxes at 31)
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
