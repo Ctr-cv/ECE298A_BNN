@@ -24,8 +24,8 @@ module tt_um_counter (
     reg [7:0] counter_reg;
     wire reset = ~rst_n;       // Active-high reset
     wire load = ui_in[7];      // Load control
-    wire output_en = ui_in[6];      // Output enable control (actve 
-    wire count_up = ui_in[5];   // Count control (1 = count up, 0 = count down)
+    wire output_en = ui_in[6];      // Output enable control (active high) 
+    wire count_up = ui_in[5];   // Count control (1 = count up, 0 = hold)
     wire [7:0] data = {3'b0, ui_in[4:0]}; // Loading data (5-bits, maxes at 31)
 
     always @(posedge clk or posedge reset) begin
@@ -35,8 +35,6 @@ module tt_um_counter (
             counter_reg <= data;  // Load on rising edge of 'load'
         end else if (count_up) begin
             counter_reg <= counter_reg + 1;  // Count up 
-        end else if (!count_up) begin
-            counter_reg <= counter_reg - 1;  // else count down
         end
     end
 
