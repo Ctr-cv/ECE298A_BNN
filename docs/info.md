@@ -9,9 +9,11 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-Explain how your project works
-
-This current project is a sample 8-bit counter that supports tri-state output
+This current project is a sample 8-bit counter that supports tri-state output. Our project (in work) is shown below:
+We will be implementing a 4-neuron Binary Neural Network (BNN), on a Tiny TapeOut ASIC to classify a 6-bit binary input (line inputs).
+The main purpose is to perform classification into 4 different classes: turn left, turn right, stop, and U-turn.
+1 neuron will be assigned to each feature detection. We will be using an external python framework like Larq to train a set of 8 weights per neuron for a total of 32.
+The design also supports neuron loading by using 4 bits of bidirectional (uio) at a time.
 
 ## How to test
 
