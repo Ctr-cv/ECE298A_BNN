@@ -5,10 +5,14 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 
-
+# ---------------------- This test needs to be updated to the actual project -------------------------
+# 1. test using static weight, 3 sets of testing data
+# 2. test using partially loaded weight onto neuron 1 & 2, 3 sets
+# 3. test using fully loaded weight onto all neurons, 3 sets 
+# 4. test on debugging outputs and intermediate process, 1 set
 @cocotb.test()
-async def test_tt_um_counter(dut):
-    dut._log.info("Start test for tt_um_counter")
+async def test_tt_um_BNN(dut): 
+    dut._log.info("Start test for BNN")
 
     # Set up the clock: 100 kHz → 10 us period
     clock = Clock(dut.clk, 10, units="us")
