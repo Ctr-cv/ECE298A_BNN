@@ -59,7 +59,7 @@ generate
                      {2'b00, (data[2] ~^ weights[i][2])} +
                      {2'b00, (data[3] ~^ weights[i][3])} + 
                      {2'b00, (data[4] ~^ weights[i][4])} +
-                     {2'b00, (data[5] ~^ weights[i][5])} +
+                     {2'b00, (data[5] ~^ weights[i][5])}
   end
 endgenerate
 
