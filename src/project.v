@@ -22,23 +22,16 @@ localparam NUM_WEIGHTS = 6;
 wire reset = ~rst_n; // use active-high reset
 wire [5:0] data = {ui_in[7:2]}; // 00 + 6-bit input
 wire load_en = uio_in[1];             // 1-bit load_en signal
-wire [5:0] data = {ui_in[7:2]}; // 00 + 6-bit input
-wire load_en = uio_in[1];             // 1-bit load_en signal
 
 reg [NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // 6-bits weight per 4 neurons, declared here
-reg [1:0] thresholds [0:NUM_NEURONS-1];  // threshold for each neuron
+reg [2:0] thresholds [0:NUM_NEURONS-1];  // threshold for each neuron
 
-reg [1:0] load_state; // Used for weight-loading to indicate # neuron.
 reg [1:0] load_state; // Used for weight-loading to indicate # neuron.
 wire [2:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 3-bit sums (max 6)
 
 initial begin
     // initialize hard-coded weights and thresholds for all neurons.
     // note that you'll need to delete or add weights depending on NUM_NEURONS
-    weights[0] = 6'b111000; thresholds[0] = 3'b010;
-    weights[1] = 6'b000111; thresholds[1] = 3'b010;
-    weights[2] = 6'b001100; thresholds[2] = 3'b010;
-    weights[3] = 6'b110011; thresholds[3] = 3'b010;
     weights[0] = 6'b111000; thresholds[0] = 3'b010;
     weights[1] = 6'b000111; thresholds[1] = 3'b010;
     weights[2] = 6'b001100; thresholds[2] = 3'b010;
@@ -82,21 +75,12 @@ endgenerate
 // --- Dedicated Outputs ---
 assign uo_out[7:4] = neuron_outputs;  // 4 neuron outputs
 // assign uo_out[3:2] = debug_bits;      // Debug signals (XOR/AND)
-assign uo_out[7:4] = neuron_outputs;  // 4 neuron outputs
-// assign uo_out[3:2] = debug_bits;      // Debug signals (XOR/AND)
 
 // --- Cleaning unused pins ---
 // --- Cleaning unused pins ---
 assign uio_out = 8'b0;      // Unused (set to 0)
 assign uio_oe  = 8'b0;      // Configure as inputs (0)
-assign ui_in[1:0] = 2'b0;
 assign uo_out[3:0] = 4'b0;
-assign uio_in[0] = 1'b0;
-assign ena = 1'b0;
-assign ui_in[1:0] = 2'b0;
-assign uo_out[3:0] = 4'b0;
-assign uio_in[0] = 1'b0;
-assign ena = 1'b0;
 
 endmodule
 
