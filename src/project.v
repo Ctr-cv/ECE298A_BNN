@@ -14,10 +14,10 @@ module tt_um_BNN (
     input  wire       ena,      // Enable
     input  wire       clk,      // Clock
     input  wire       rst_n     // Active-low reset
-)
+);
 // --------------- Constants set for BNN ------------------------
-parameter NUM_NEURONS = 4;
-parameter NUM_WEIGHTS = 6;
+localparam NUM_NEURONS = 4;
+localparam NUM_WEIGHTS = 6;
 
 wire reset = ~rst_n; // use active-high reset
 wire [5:0] data = {2'b0, ui_in[7:2]}; // 00 + 6-bit input
