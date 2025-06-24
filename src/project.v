@@ -54,12 +54,12 @@ genvar i;
 generate
   for (i = 0; i < NUM_NEURONS; i = i + 1) begin : neuron
     // XNOR each input bit with weight, then sum
-    assign sums[i] = (input_data[0] ~^ weights[i][0]) + 
-                     (input_data[1] ~^ weights[i][1]) + 
-                     (input_data[2] ~^ weights[i][2]) + 
-                     (input_data[3] ~^ weights[i][3]) + 
-                     (input_data[4] ~^ weights[i][4]) + 
-                     (input_data[5] ~^ weights[i][5]);
+    assign sums[i] = (data[0] ~^ weights[i][0]) + 
+                     (data[1] ~^ weights[i][1]) + 
+                     (data[2] ~^ weights[i][2]) + 
+                     (data[3] ~^ weights[i][3]) + 
+                     (data[4] ~^ weights[i][4]) + 
+                     (data[5] ~^ weights[i][5]);
   end
 endgenerate
 
