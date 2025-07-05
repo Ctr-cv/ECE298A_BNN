@@ -6,7 +6,7 @@
 `default_nettype none
 
 module tt_um_BNN (
-    input  wire [7:0] ui_in,    // Input: 8-bit data, [7:0]
+    input  wire [7:0] ui_in,    // Input: 8-bit ui_in, [7:0]
     output wire [7:0] uo_out,   // Output: 4 neuron output + 2 debug bits, [7:2]
     input  wire [7:0] uio_in,   // Bir-Inputs: 4-bit weight [7:4], 1-bit load_en [3]
     output wire [7:0] uio_out,  // Bir-Outputs: Unused
@@ -20,8 +20,6 @@ localparam NUM_NEURONS = 8;
 localparam NUM_WEIGHTS = 4;
 
 wire reset = ~rst_n; // use active-high reset
-wire [7:0] data = {ui_in[7:0]}; // 8-bit input
-wire load_en = uio_in[3];       // 1-bit load_en signal
 
 // 8-bits weight per 4 neurons, declared here
 reg [2*NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // neuron 0 takes [7:0] weights at index 0, and etc.
@@ -58,7 +56,7 @@ always @(posedge clk or posedge reset) begin
     load_state <= 0;
     temp_weight <= 8'b00000000;
     bit_index <= 0;
-  end else if (load_en) begin  // Use bidir pin to trigger loading
+  end else if (uio_in[3]) begin  // Use bidir pin to trigger loading
     if (bit_index == 0) begin
       temp_weight[3:0] <= uio_in[7:4];
       bit_index <= 1;
@@ -76,14 +74,14 @@ genvar i;
 generate
   for (i = 0; i < 4; i = i + 1) begin : neuron
     // XNOR each input bit with weight, then sum
-    assign sums[i] = {3'b000, (data[0] ~^ weights[i][0])} + 
-                     {3'b000, (data[1] ~^ weights[i][1])} +
-                     {3'b000, (data[2] ~^ weights[i][2])} +
-                     {3'b000, (data[3] ~^ weights[i][3])} + 
-                     {3'b000, (data[4] ~^ weights[i][4])} + 
-                     {3'b000, (data[5] ~^ weights[i][5])} +
-                     {3'b000, (data[6] ~^ weights[i][6])} +
-                     {3'b000, (data[7] ~^ weights[i][7])};
+    assign sums[i] = {3'b000, (ui_in[0] ~^ weights[i][0])} + 
+                     {3'b000, (ui_in[1] ~^ weights[i][1])} +
+                     {3'b000, (ui_in[2] ~^ weights[i][2])} +
+                     {3'b000, (ui_in[3] ~^ weights[i][3])} + 
+                     {3'b000, (ui_in[4] ~^ weights[i][4])} + 
+                     {3'b000, (ui_in[5] ~^ weights[i][5])} +
+                     {3'b000, (ui_in[6] ~^ weights[i][6])} +
+                     {3'b000, (ui_in[7] ~^ weights[i][7])};
   end
 endgenerate
 
@@ -119,11 +117,10 @@ endgenerate
 
 // --------------- Output Assignment ----------------------------
 // --- Dedicated Outputs ---
-assign uo_out[7:0] = {neuron_out2, 4'b0000};  // 4 neuron outputs
-// assign uo_out[3:2] = debug_bits;      // Debug signals (XOR/AND)
+assign uo_out[7:0] = {neuron_out2, neuron_out1};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
-assign uio_out = 8'b0;      // Unused (set to 0)
-assign uio_oe  = 8'b0;      // Configure as inputs (0)
+assign uio_out = 8'b00000000;      // Unused (set to 0)
+assign uio_oe  = 8'b00000000;      // Configure as inputs (0)
 
 endmodule
