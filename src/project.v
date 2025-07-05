@@ -81,3 +81,5 @@ assign uo_out[7:4] = neuron_outputs;  // 4 neuron outputs
 assign uio_out = 8'b0;      // Unused (set to 0)
 assign uio_oe  = 8'b0;      // Configure as inputs (0)
 assign uo_out[3:0] = 4'b0;
+
+endmodule
