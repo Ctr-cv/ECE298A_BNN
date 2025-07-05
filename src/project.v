@@ -20,7 +20,7 @@ localparam NUM_NEURONS = 8;
 localparam NUM_WEIGHTS = 4;
 
 wire reset = ~rst_n; // use active-high reset
-wire [7:0] data = {ui_in[7:0]}; // 8-bit input
+wire [7:0] data = ui_in[7:0]; // 8-bit input
 wire load_en = uio_in[3];       // 1-bit load_en signal
 
 // 8-bits weight per 4 neurons, declared here
