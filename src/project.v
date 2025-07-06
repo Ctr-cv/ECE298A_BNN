@@ -28,7 +28,7 @@ reg [3:0] thresholds [0:NUM_NEURONS-1];  // threshold for each neuron
 reg [2:0] load_state; // Used for weight-loading to indicate # neuron.
 wire [3:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 4-bit sums
 
-reg [7:0] temp_weight; // used as a buffer for weight loading
+reg [3:0] temp_weight; // used as a buffer for weight loading
 reg bit_index; // Used for weight loading. 0: lower 4 bits, 1: upper 4 bits
 
 
@@ -56,13 +56,12 @@ always @(posedge clk or posedge reset) begin
     load_state <= 0;
     temp_weight <= 8'b00000000;
     bit_index <= 0;
-  end else if (uio_in[3]) begin  // Use bidir pin to trigger loading
+  end else if (ena && uio_in[3]) begin  // Use bidir pin to trigger loading
     if (bit_index == 0) begin
       temp_weight[3:0] <= uio_in[7:4];
       bit_index <= 1;
     end else begin
-      temp_weight[7:4] <= uio_in[7:4];
-      weights[load_state] <= temp_weight;
+      weights[load_state] <= {uio[7:4], temp_weight[3:0]};
       load_state <= load_state + 1;
       bit_index <= 0;
     end
@@ -110,7 +109,7 @@ endgenerate
 // ----------------- Threshold Activation -------------------------
 wire [3:0] neuron_out2;
 generate
-  for (j = 4; j < NUM_NEURONS; j = j + 1) begin : activation
+  for (j = 4; j < NUM_NEURONS; j = j + 1) begin : activation2
     assign neuron_out2[j-4] = (sums[j] >= thresholds[j]);
   end
 endgenerate
