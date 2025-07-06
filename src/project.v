@@ -61,7 +61,7 @@ always @(posedge clk or posedge reset) begin
       temp_weight[3:0] <= uio_in[7:4];
       bit_index <= 1;
     end else begin
-      weights[load_state] <= {uio[7:4], temp_weight[3:0]};
+      weights[load_state] <= {uio_in[7:4], temp_weight[3:0]};
       load_state <= load_state + 1;
       bit_index <= 0;
     end
