@@ -137,27 +137,27 @@ endgenerate
 
 // ------------------------ Layer 3 ------------------------------
 // ------------------ XNOR-Popcount Calculation ------------------
-genvar j;
+genvar k;
 generate
-  for (j = 16; j < NUM_NEURONS; j = j + 1) begin : neuron3
+  for (k = 16; k < NUM_NEURONS; k = k + 1) begin : neuron3
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
-    assign sums[j] = {3'b000, (neuron_out2[0] ~^ weights[j][0])} +
-                     {3'b000, (neuron_out2[1] ~^ weights[j][1])} +
-                     {3'b000, (neuron_out2[2] ~^ weights[j][2])} +
-                     {3'b000, (neuron_out2[3] ~^ weights[j][3])} + 
-                     {3'b000, (neuron_out2[4] ~^ weights[j][4])} +
-                     {3'b000, (neuron_out2[5] ~^ weights[j][5])} +
-                     {3'b000, (neuron_out2[6] ~^ weights[j][6])} +
-                     {3'b000, (neuron_out2[7] ~^ weights[j][7])};
+    assign sums[k] = {3'b000, (neuron_out2[0] ~^ weights[k][0])} +
+                     {3'b000, (neuron_out2[1] ~^ weights[k][1])} +
+                     {3'b000, (neuron_out2[2] ~^ weights[k][2])} +
+                     {3'b000, (neuron_out2[3] ~^ weights[k][3])} + 
+                     {3'b000, (neuron_out2[4] ~^ weights[k][4])} +
+                     {3'b000, (neuron_out2[5] ~^ weights[k][5])} +
+                     {3'b000, (neuron_out2[6] ~^ weights[k][6])} +
+                     {3'b000, (neuron_out2[7] ~^ weights[k][7])};
   end
 endgenerate
 
 // ----------------- Threshold Activation -------------------------
 wire [3:0] neuron_out3;
 generate
-  for (j = 16; j < NUM_NEURONS; j = j + 1) begin : activation3
-    assign neuron_out3[j-16] = (sums[j] >= thresholds[j]);
+  for (k = 16; k < NUM_NEURONS; k = k + 1) begin : activation3
+    assign neuron_out3[k-16] = (sums[k] >= thresholds[k]);
   end
 endgenerate
 
