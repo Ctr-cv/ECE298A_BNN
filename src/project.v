@@ -143,13 +143,13 @@ generate
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
     assign sums[j] = {3'b000, (neuron_out2[0] ~^ weights[j][0])} +
-                     {3'b000, (neuron_out3[1] ~^ weights[j][1])} +
-                     {3'b000, (neuron_out4[2] ~^ weights[j][2])} +
-                     {3'b000, (neuron_out5[3] ~^ weights[j][3])} + 
-                     {3'b000, (neuron_out6[4] ~^ weights[j][4])} +
-                     {3'b000, (neuron_out7[5] ~^ weights[j][5])} +
-                     {3'b000, (neuron_out8[6] ~^ weights[j][6])} +
-                     {3'b000, (neuron_out9[7] ~^ weights[j][7])};
+                     {3'b000, (neuron_out2[1] ~^ weights[j][1])} +
+                     {3'b000, (neuron_out2[2] ~^ weights[j][2])} +
+                     {3'b000, (neuron_out2[3] ~^ weights[j][3])} + 
+                     {3'b000, (neuron_out2[4] ~^ weights[j][4])} +
+                     {3'b000, (neuron_out2[5] ~^ weights[j][5])} +
+                     {3'b000, (neuron_out2[6] ~^ weights[j][6])} +
+                     {3'b000, (neuron_out2[7] ~^ weights[j][7])};
   end
 endgenerate
 
