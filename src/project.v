@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+ /*
+ * This is the Design for a 8-8-4 neuron BNN with weight loading into all neurons.
+ */
+
 `default_nettype none
 
 module tt_um_BNN (
@@ -16,7 +20,7 @@ module tt_um_BNN (
     input  wire       rst_n     // Active-low reset
 );
 // --------------- Constants set for BNN ------------------------
-localparam NUM_NEURONS = 8;
+localparam NUM_NEURONS = 20;
 localparam NUM_WEIGHTS = 4;
 
 wire reset = ~rst_n; // use active-high reset
@@ -25,7 +29,7 @@ wire reset = ~rst_n; // use active-high reset
 reg [2*NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // neuron 0 takes [7:0] weights at index 0, and etc.
 reg [3:0] thresholds [0:NUM_NEURONS-1];  // threshold for each neuron
 
-reg [2:0] load_state; // Used for weight-loading to indicate # neuron.
+reg [4:0] load_state; // Used for weight-loading to indicate # neuron.
 wire [3:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 4-bit sums
 
 reg [3:0] temp_weight; // used as a buffer for weight loading
@@ -36,20 +40,32 @@ reg bit_index; // Used for weight loading. 0: lower 4 bits, 1: upper 4 bits
 initial begin
     // initialize hard-coded weights and thresholds for all neurons.
     // note that you'll need to delete or add weights depending on NUM_NEURONS
-    // First layer: 4 neurons
+    // First layer: 8 neurons
     weights[0] = 8'b11110000; thresholds[0] = 4'b0101;
     weights[1] = 8'b00001111; thresholds[1] = 4'b0101;
     weights[2] = 8'b00111100; thresholds[2] = 4'b0101;
     weights[3] = 8'b11000011; thresholds[3] = 4'b0101;
-    // Second layer: 4 neurons
     weights[4] = 8'b11110000; thresholds[4] = 4'b0101;
     weights[5] = 8'b00001111; thresholds[5] = 4'b0101;
     weights[6] = 8'b00111100; thresholds[6] = 4'b0101;
     weights[7] = 8'b11000011; thresholds[7] = 4'b0101;
+    // Second layer: 8 neurons
+    weights[8] = 8'b11110000; thresholds[8] = 4'b0101;
+    weights[9] = 8'b00001111; thresholds[9] = 4'b0101;
+    weights[10] = 8'b00111100; thresholds[10] = 4'b0101;
+    weights[11] = 8'b11000011; thresholds[11] = 4'b0101;
+    weights[12] = 8'b11110000; thresholds[12] = 4'b0101;
+    weights[13] = 8'b00001111; thresholds[13] = 4'b0101;
+    weights[14] = 8'b00111100; thresholds[14] = 4'b0101;
+    weights[15] = 8'b11000011; thresholds[15] = 4'b0101;
+    // Third layer: 4 neurons
+    weights[16] = 8'b11110000; thresholds[16] = 4'b0101;
+    weights[17] = 8'b00001111; thresholds[17] = 4'b0101;
+    weights[18] = 8'b00111100; thresholds[18] = 4'b0101;
+    weights[19] = 8'b11000011; thresholds[19] = 4'b0101;
 end
 
-// ------------------------ Layer 1 ------------------------------
-// -------------- Layer 1 + Layer 2 Weight Loading ----------------------------
+// -------------- Weight Loading for all layers ----------------------------
 // NOTE: each neuron takes 2 clock cycles to load, needs to set load_enable high for at least 2 cycles
 always @(posedge clk or posedge reset) begin
   if (reset) begin
@@ -68,10 +84,11 @@ always @(posedge clk or posedge reset) begin
   end
 end
 
+// ------------------------ Layer 1 ------------------------------
 // ---------- XNOR-Popcount Calculation ------------
 genvar i;
 generate
-  for (i = 0; i < 4; i = i + 1) begin : neuron
+  for (i = 0; i < 8; i = i + 1) begin : neuron1
     // XNOR each input bit with weight, then sum
     assign sums[i] = {3'b000, (ui_in[0] ~^ weights[i][0])} + 
                      {3'b000, (ui_in[1] ~^ weights[i][1])} +
@@ -85,9 +102,9 @@ generate
 endgenerate
 
 // ----------------- Threshold Activation -------------------------
-wire [3:0] neuron_out1;
+wire [7:0] neuron_out1;
 generate
-  for (i = 0; i < 4; i = i + 1) begin : activation
+  for (i = 0; i < 8; i = i + 1) begin : activation
     assign neuron_out1[i] = (sums[i] >= thresholds[i]);
   end
 endgenerate
@@ -96,27 +113,57 @@ endgenerate
 // ------------------ XNOR-Popcount Calculation ------------------
 genvar j;
 generate
-  for (j = 4; j < NUM_NEURONS; j = j + 1) begin : neuron2
+  for (j = 8; j < 16; j = j + 1) begin : neuron2
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
-    assign sums[j] = {3'b000, (neuron_out1[0] ~^ weights[j][4])} +
-                     {3'b000, (neuron_out1[1] ~^ weights[j][5])} +
-                     {3'b000, (neuron_out1[2] ~^ weights[j][6])} +
-                     {3'b000, (neuron_out1[3] ~^ weights[j][7])};
+    assign sums[j] = {3'b000, (neuron_out1[0] ~^ weights[j][0])} +
+                     {3'b000, (neuron_out1[1] ~^ weights[j][1])} +
+                     {3'b000, (neuron_out1[2] ~^ weights[j][2])} +
+                     {3'b000, (neuron_out1[3] ~^ weights[j][3])} + 
+                     {3'b000, (neuron_out1[4] ~^ weights[j][4])} +
+                     {3'b000, (neuron_out1[5] ~^ weights[j][5])} +
+                     {3'b000, (neuron_out1[6] ~^ weights[j][6])} +
+                     {3'b000, (neuron_out1[7] ~^ weights[j][7])};
   end
 endgenerate
 
 // ----------------- Threshold Activation -------------------------
-wire [3:0] neuron_out2;
+wire [7:0] neuron_out2;
 generate
-  for (j = 4; j < NUM_NEURONS; j = j + 1) begin : activation2
-    assign neuron_out2[j-4] = (sums[j] >= thresholds[j]);
+  for (j = 8; j < 16; j = j + 1) begin : activation2
+    assign neuron_out2[j-8] = (sums[j] >= thresholds[j]);
+  end
+endgenerate
+
+// ------------------------ Layer 3 ------------------------------
+// ------------------ XNOR-Popcount Calculation ------------------
+genvar j;
+generate
+  for (j = 16; j < NUM_NEURONS; j = j + 1) begin : neuron3
+    // XNOR each input bit with weight, then sum
+    // Note, here only last 4 bits of weights are taken from weights[7:4].
+    assign sums[j] = {3'b000, (neuron_out2[0] ~^ weights[j][0])} +
+                     {3'b000, (neuron_out3[1] ~^ weights[j][1])} +
+                     {3'b000, (neuron_out4[2] ~^ weights[j][2])} +
+                     {3'b000, (neuron_out5[3] ~^ weights[j][3])} + 
+                     {3'b000, (neuron_out6[4] ~^ weights[j][4])} +
+                     {3'b000, (neuron_out7[5] ~^ weights[j][5])} +
+                     {3'b000, (neuron_out8[6] ~^ weights[j][6])} +
+                     {3'b000, (neuron_out9[7] ~^ weights[j][7])};
+  end
+endgenerate
+
+// ----------------- Threshold Activation -------------------------
+wire [3:0] neuron_out3;
+generate
+  for (j = 16; j < NUM_NEURONS; j = j + 1) begin : activation3
+    assign neuron_out3[j-16] = (sums[j] >= thresholds[j]);
   end
 endgenerate
 
 // --------------- Output Assignment ----------------------------
 // --- Dedicated Outputs ---
-assign uo_out[7:0] = {neuron_out2, neuron_out1};  // 4 neuron outputs
+assign uo_out[7:0] = {neuron_out3, 4'b0000};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)
