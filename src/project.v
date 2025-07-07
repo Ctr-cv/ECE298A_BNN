@@ -54,11 +54,11 @@ initial begin
     weights[9] = 8'b00001111; thresholds[9] = 4'b0101;
     weights[10] = 8'b00111100; thresholds[10] = 4'b0101;
     weights[11] = 8'b11000011; thresholds[11] = 4'b0101;
-    // Third layer: 4 neurons (NOTE: only [3:0] are read by the neurons here)
+    // Third layer: 4 neurons
     weights[12] = 8'b11110000; thresholds[12] = 4'b0101;
     weights[13] = 8'b00110000; thresholds[13] = 4'b0101;
     weights[14] = 8'b10100000; thresholds[14] = 4'b0101;
-    weights[15] = 8'b01010000; thresholds[15] = 4'b0101;
+    weights[15] = 8'b11000011; thresholds[15] = 4'b0101;
 end
 
 // -------------- Weight Loading for all layers ----------------------------
@@ -100,7 +100,7 @@ endgenerate
 // ----------------- Threshold Activation -------------------------
 wire [7:0] neuron_out1;
 generate
-  for (i = 0; i < 8; i = i + 1) begin : activation
+  for (i = 0; i < 8; i = i + 1) begin : activation1
     assign neuron_out1[i] = (sums[i] >= thresholds[i]);
   end
 endgenerate
@@ -138,10 +138,10 @@ generate
   for (k = 12; k < NUM_NEURONS; k = k + 1) begin : neuron3
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
-    assign sums[k] = {3'b000, (neuron_out2[0] ~^ weights[k][0])} +
-                     {3'b000, (neuron_out2[1] ~^ weights[k][1])} +
-                     {3'b000, (neuron_out2[2] ~^ weights[k][2])} +
-                     {3'b000, (neuron_out2[3] ~^ weights[k][3])};
+    assign sums[k] = {3'b000, (neuron_out2[0] ~^ weights[k][4])} +
+                     {3'b000, (neuron_out2[1] ~^ weights[k][5])} +
+                     {3'b000, (neuron_out2[2] ~^ weights[k][6])} +
+                     {3'b000, (neuron_out2[3] ~^ weights[k][7])};
   end
 endgenerate
 
@@ -155,7 +155,7 @@ endgenerate
 
 // --------------- Output Assignment ----------------------------
 // --- Dedicated Outputs ---
-assign uo_out[7:0] = {neuron_out3, 4'b0000};  // 4 neuron outputs
+assign uo_out[7:0] = {neuron_out3, neuron_out2};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)
