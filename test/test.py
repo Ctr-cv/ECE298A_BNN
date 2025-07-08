@@ -55,7 +55,7 @@ async def test_hardcoded_weights(dut):
     dut.ui_in.value = test_input
     await RisingEdge(dut.clk)
     await Timer(2, units="ns")  # Allow combinational logic to settle
-    assert int(dut.uo_out.value) == expected_output, f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:8])}, expected {bin(expected_output)}"
+    assert int(dut.uo_out.value) == expected_output, f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output)}"
 
 async def test_weight_loading(dut):
     """Test dynamic weight loading through bidirectional pins"""
