@@ -3,7 +3,9 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import RisingEdge, Timer
+from cocotb.result import TestFailure
+import random
 
 # ---------------------- This test needs to be updated to the actual project -------------------------
 # 1. test using static weight, 3 sets of testing data
@@ -12,46 +14,154 @@ from cocotb.triggers import ClockCycles
 # 4. test on debugging outputs and intermediate process, 1 set
 @cocotb.test()
 async def test_tt_um_BNN(dut): 
-    dut._log.info("Start test for BNN")
-
-    # Set up the clock: 100 kHz → 10 us period
-    clock = Clock(dut.clk, 10, units="us")
+    # Start clock (100MHz)
+    clock = Clock(dut.clk, 10, units="ns")
     cocotb.start_soon(clock.start())
-
-    # Initial values
-    dut.ena.value = 1
+    
+    # Initialize signals
     dut.ui_in.value = 0
     dut.uio_in.value = 0
+    dut.ena.value = 1
     dut.rst_n.value = 0
-
-    # Apply reset
-    dut._log.info("Apply reset")
-    await ClockCycles(dut.clk, 5)
+    
+    # Reset for 2 cycles
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
     dut.rst_n.value = 1
+    await RisingEdge(dut.clk)
+    
+    # --------------------------
+    # Test 1: Verify Hardcoded Weights
+    # --------------------------
+    await test_hardcoded_weights(dut)
+    
+    # --------------------------
+    # Test 2: Dynamic Weight Loading
+    # --------------------------
+    # await test_weight_loading(dut)
+    
+    # --------------------------
+    # Test 3: Full Network Inference
+    # --------------------------
+    # await test_network_inference(dut)
 
-    # Enable output to safely read uo_out
-    dut._log.info("Enable output to check reset value")
-    dut.ui_in.value = 0b01000000  # output_en = 1, others 0
-    await ClockCycles(dut.clk, 1)
+async def test_hardcoded_weights(dut):
+    """Test that initial hardcoded weights produce correct outputs"""
+    cocotb.log.info("Testing hardcoded weights")
+    
+    # Test pattern that should activate neuron 0 (weights = 11110000)
+    test_input = 0b11110000
+    expected_output = 0b1000  # Only first neuron of last layer should activate
+    
+    dut.ui_in.value = test_input
+    await RisingEdge(dut.clk)
+    await Timer(1, units="ns")  # Allow combinational logic to settle
+    
+    if int(dut.uo_out.value) != expected_output:
+        raise TestFailure(f"Hardcoded weight test failed. Got {dut.uo_out.value}, expected {expected_output}")
 
-    assert dut.uo_out.value.integer == 0, f"Expected counter 0 after reset, got {dut.uo_out.value}"
+async def test_weight_loading(dut):
+    """Test dynamic weight loading through bidirectional pins"""
+    cocotb.log.info("Testing weight loading")
+    
+    # Enable weight loading mode
+    dut.uio_in.value = 0b00001000  # Set bit 3 (load_en) high
+    
+    # Test loading weights for neuron 0
+    new_weights = 0b10100101
+    await load_weights(dut, neuron_idx=0, weights=new_weights)
+    
+    # Verify by testing inference
+    test_input = 0b10100101  # Should perfectly match new weights
+    expected_output = 0b1000  # Threshold is 5 (0101), sum will be 8
+    
+    dut.ui_in.value = test_input
+    dut.uio_in.value = 0  # Disable weight loading
+    await RisingEdge(dut.clk)
+    await Timer(1, units="ns")
+    
+    if int(dut.uo_out.value) != expected_output:
+        raise TestFailure(f"Weight loading test failed. Got {dut.uo_out.value}, expected {expected_output}")
 
-    # Load value 16
-    dut._log.info("Load 16 into the counter")
-    dut.ui_in.value = 0b10110000  # load=1, count_up=1, data=16, output_en=0
-    await ClockCycles(dut.clk, 1)
+async def load_weights(dut, neuron_idx, weights):
+    """Helper function to load weights for a specific neuron"""
+    # Load lower 4 bits first
+    dut.uio_in.value = (weights & 0x0F) << 4 | 0b1000
+    await RisingEdge(dut.clk)
+    
+    # Load upper 4 bits
+    dut.uio_in.value = (weights >> 4) << 4 | 0b1000
+    await RisingEdge(dut.clk)
+    
+    cocotb.log.info(f"Loaded weights {bin(weights)} to neuron {neuron_idx}")
 
-    # Deassert load, keep output_en=1 to read value
-    dut.ui_in.value = 0b01100000  # load=0, output_en=1, count_up=1
-    await ClockCycles(dut.clk, 1)
+async def test_network_inference(dut):
+    """Test complete network inference with random inputs"""
+    cocotb.log.info("Testing network inference")
+    
+    # Test 10 random patterns
+    for _ in range(10):
+        # Generate random input
+        test_input = random.randint(0, 255)
+        
+        # Calculate expected output (based on hardcoded weights)
+        expected = calculate_expected_output(test_input)
+        
+        # Apply input
+        dut.ui_in.value = test_input
+        await RisingEdge(dut.clk)
+        await Timer(1, units="ns")
+        
+        # Verify output
+        if int(dut.uo_out.value) != expected:
+            raise TestFailure(f"Inference failed for input {bin(test_input)}. Got {dut.uo_out.value}, expected {expected}")
 
-    assert dut.uo_out.value.integer == 16, f"Expected counter to be 16 after load, got {dut.uo_out.value}"
-
-    # Count up 3 times
-    dut._log.info("Count up for 3 cycles")
-    dut.ui_in.value = 0b01100000  # count_up=1, output_en=1, load=0
-    await ClockCycles(dut.clk, 3)
-
-    assert dut.uo_out.value.integer == 19, f"Expected counter 19 after 3 up counts, got {dut.uo_out.value}"
-
-    dut._log.info("Test completed successfully.")
+def calculate_expected_output(input_val):
+    """Calculate expected output based on hardcoded weights"""
+    # Layer 1 weights (first 8 neurons)
+    layer1_weights = [
+        0b11110000, 0b00001111, 0b00111100, 0b11000011,
+        0b11110000, 0b00001111, 0b00111100, 0b11000011
+    ]
+    
+    # Layer 2 weights (neurons 8-11)
+    layer2_weights = [
+        0b11110000, 0b00001111, 0b00111100, 0b11000011
+    ]
+    
+    # Layer 3 weights (neurons 12-15)
+    layer3_weights = [
+        0b11110000, 0b00110000, 0b10100000, 0b11000011
+    ]
+    
+    # Threshold for all neurons is 5 (0101)
+    threshold = 5
+    
+    # Layer 1 computation
+    layer1_output = 0
+    for i in range(8):
+        matches = bin(input_val ^ layer1_weights[i]).count('0')
+        if matches >= threshold:
+            layer1_output |= (1 << i)
+    
+    # Layer 2 computation
+    layer2_output = 0
+    for i in range(4):
+        # Compare with bits [4:7] of weights (per your code)
+        weight_part = (layer2_weights[i] >> 4) & 0x0F
+        input_part = (layer1_output >> 4) & 0x0F
+        matches = bin(input_part ^ weight_part).count('0')
+        if matches >= threshold:
+            layer2_output |= (1 << i)
+    
+    # Layer 3 computation
+    final_output = 0
+    for i in range(4):
+        # Compare with bits [4:7] of weights (per your code)
+        weight_part = (layer3_weights[i] >> 4) & 0x0F
+        input_part = layer2_output
+        matches = bin(input_part ^ weight_part).count('0')
+        if matches >= threshold:
+            final_output |= (1 << i)
+    
+    return final_output
