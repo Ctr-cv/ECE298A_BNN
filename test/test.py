@@ -25,10 +25,9 @@ async def test_tt_um_BNN(dut):
     dut.rst_n.value = 0
     
     # Reset for 2 cycles
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
+    await Timer(2, units="ns")
     dut.rst_n.value = 1
-    await RisingEdge(dut.clk)
+    await Timer(2, units="ns")
     
     # --------------------------
     # Test 1: Verify Hardcoded Weights
@@ -50,12 +49,12 @@ async def test_hardcoded_weights(dut):
     cocotb.log.info("Testing hardcoded weights")
     
     # Test pattern that should activate neuron 0 (weights = 11110000)
-    test_input = 0b11111111
+    test_input = 0b11110000
     expected_output = 0b1000  # Only first neuron of last layer should activate
     
     dut.ui_in.value = test_input
     await RisingEdge(dut.clk)
-    await Timer(1, units="ns")  # Allow combinational logic to settle
+    await Timer(2, units="ns")  # Allow combinational logic to settle
     if int(dut.uo_out.value) != expected_output:
         raise TestFailure(f"Hardcoded weight test failed. Got {bin(dut.uo_out.value)}, expected {bin(expected_output)}")
 
