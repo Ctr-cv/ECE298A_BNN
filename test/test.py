@@ -53,7 +53,6 @@ async def test_hardcoded_weights(dut):
     expected_output = 0b1000  # Only first neuron of last layer should activate
     
     dut.ui_in.value = test_input
-    await RisingEdge(dut.clk)
     await Timer(2, units="ns")  # Allow combinational logic to settle
     assert int(dut.uo_out.value) == expected_output, f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output)}"
 
