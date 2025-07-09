@@ -20,7 +20,7 @@ module tt_um_BNN (
     input  wire       rst_n     // Active-low reset
 );
 // --------------- Constants set for BNN ------------------------
-localparam NUM_NEURONS = 16;
+localparam NUM_NEURONS = 20;
 localparam NUM_WEIGHTS = 4;
 
 wire reset = ~rst_n; // use active-high reset
@@ -49,16 +49,20 @@ initial begin
     weights[5] = 8'b00001111; thresholds[5] = 4'b0000;
     weights[6] = 8'b00111100; thresholds[6] = 4'b0000;
     weights[7] = 8'b11000011; thresholds[7] = 4'b0000;
-    // Second layer: 4 neurons
+    // Second layer: 8 neurons
     weights[8] = 8'b11110000; thresholds[8] = 4'b0100;
     weights[9] = 8'b00001111; thresholds[9] = 4'b0100;
     weights[10] = 8'b00111100; thresholds[10] = 4'b0100;
     weights[11] = 8'b11000011; thresholds[11] = 4'b0100;
-    // Third layer: 4 neurons
     weights[12] = 8'b11110000; thresholds[12] = 4'b0100;
     weights[13] = 8'b00110000; thresholds[13] = 4'b0100;
     weights[14] = 8'b10100000; thresholds[14] = 4'b0100;
     weights[15] = 8'b11000011; thresholds[15] = 4'b0100;
+    // Third layer: 4 neurons
+    weights[16] = 8'b11110000; thresholds[16] = 4'b0100;
+    weights[17] = 8'b00110000; thresholds[17] = 4'b0100;
+    weights[18] = 8'b10100000; thresholds[18] = 4'b0100;
+    weights[19] = 8'b11000011; thresholds[19] = 4'b0100;
 end
 
 // -------------- Weight Loading for all layers ----------------------------
@@ -109,7 +113,7 @@ endgenerate
 // ------------------ XNOR-Popcount Calculation ------------------
 genvar j;
 generate
-  for (j = 8; j < 12; j = j + 1) begin : neuron2
+  for (j = 8; j < 16; j = j + 1) begin : neuron2
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
     assign sums[j] = {3'b000, (neuron_out1[0] ~^ weights[j][0])} +
@@ -124,9 +128,9 @@ generate
 endgenerate
 
 // ----------------- Threshold Activation -------------------------
-wire [3:0] neuron_out2;
+wire [7:0] neuron_out2;
 generate
-  for (j = 8; j < 12; j = j + 1) begin : activation2
+  for (j = 8; j < 16; j = j + 1) begin : activation2
     assign neuron_out2[j-8] = (sums[j] >= thresholds[j]);
   end
 endgenerate
@@ -135,27 +139,31 @@ endgenerate
 // ------------------ XNOR-Popcount Calculation ------------------
 genvar k;
 generate
-  for (k = 12; k < NUM_NEURONS; k = k + 1) begin : neuron3
+  for (k = 16; k < NUM_NEURONS; k = k + 1) begin : neuron3
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
-    assign sums[k] = {3'b000, (neuron_out2[0] ~^ weights[k][4])} +
-                     {3'b000, (neuron_out2[1] ~^ weights[k][5])} +
-                     {3'b000, (neuron_out2[2] ~^ weights[k][6])} +
-                     {3'b000, (neuron_out2[3] ~^ weights[k][7])};
+    assign sums[k] = {3'b000, (neuron_out2[0] ~^ weights[k][0])} +
+                     {3'b000, (neuron_out2[1] ~^ weights[k][1])} +
+                     {3'b000, (neuron_out2[2] ~^ weights[k][2])} +
+                     {3'b000, (neuron_out2[3] ~^ weights[k][3])} + 
+                     {3'b000, (neuron_out2[4] ~^ weights[k][4])} +
+                     {3'b000, (neuron_out2[5] ~^ weights[k][5])} +
+                     {3'b000, (neuron_out2[6] ~^ weights[k][6])} +
+                     {3'b000, (neuron_out2[7] ~^ weights[k][7])};
   end
 endgenerate
 
 // ----------------- Threshold Activation -------------------------
 wire [3:0] neuron_out3;
 generate
-  for (k = 12; k < NUM_NEURONS; k = k + 1) begin : activation3
-    assign neuron_out3[k-12] = (sums[k] >= thresholds[k]);
+  for (k = 16; k < NUM_NEURONS; k = k + 1) begin : activation3
+    assign neuron_out3[k-16] = (sums[k] >= thresholds[k]);
   end
 endgenerate
 
 // --------------- Output Assignment ----------------------------
-// --- Dedicated Outputs ---
-assign uo_out[7:0] = {neuron_out3, neuron_out2};  // 4 neuron outputs
+// -------------- Dedicated Outputs ----------------------------
+assign uo_out[7:0] = {neuron_out3, neuron_out2[7:4]};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)
