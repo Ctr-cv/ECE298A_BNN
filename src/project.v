@@ -157,12 +157,7 @@ endgenerate
 
 // --------------- Output Assignment ----------------------------
 // -------------- Dedicated Outputs ----------------------------
-reg [7:0] uo_out_reg;
-always @(posedge clk or posedge reset) begin
-  if (reset) uo_out_reg <= 8'b0;
-  else uo_out_reg <= {neuron_out3, neuron_out2[7:4]};  // 4 neuron outputs
-end
-assign uo_out[7:0] = uo_out_reg;
+assign uo_out[7:0] = {neuron_out3, neuron_out2[7:4]};
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)
