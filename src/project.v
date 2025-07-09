@@ -22,12 +22,12 @@ module tt_um_BNN (
 // --------------- Constants set for BNN ------------------------
 localparam NUM_NEURONS = 12;
 localparam NUM_WEIGHTS = 4;
+localparam thresholds = 4;
 
 wire reset = ~rst_n; // use active-high reset
 
 // 8-bits weight per 4 neurons, declared here
 reg [2*NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // neuron 0 takes [7:0] weights at index 0, and etc.
-reg [3:0] thresholds [0:NUM_NEURONS-1];  // threshold for each neuron
 
 reg [4:0] load_state; // Used for weight-loading to indicate # neuron.
 wire [3:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 4-bit sums
@@ -89,7 +89,7 @@ endgenerate
 wire [7:0] neuron_out1;
 generate
   for (i = 0; i < 8; i = i + 1) begin : activation1
-    assign neuron_out1[i] = (sums[i] >= thresholds[i]);
+    assign neuron_out1[i] = (sums[i] >= thresholds);
   end
 endgenerate
 
@@ -141,7 +141,7 @@ endgenerate
 wire [3:0] neuron_out3;
 generate
   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation3
-    assign neuron_out3[k-8] = (sums[k] >= thresholds[k]);
+    assign neuron_out3[k-8] = (sums[k] >= thresholds);
   end
 endgenerate
 
