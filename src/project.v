@@ -64,7 +64,7 @@ always @(posedge clk or posedge reset) begin
     weights[19] <= 8'b01000010; thresholds[19] <= 4'b0100;
 
     load_state <= 0;
-    temp_weight <= 8'b00000000;
+    temp_weight <= 8'b0000;
     bit_index <= 0;
   end else if (ena && uio_in[3]) begin  // Use bidir pin to trigger loading
     if (bit_index == 0) begin
