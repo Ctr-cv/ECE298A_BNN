@@ -37,7 +37,7 @@ async def test_tt_um_BNN(dut):
     # --------------------------
     # Test 2: Dynamic Weight Loading
     # --------------------------
-    # await test_weight_loading(dut)
+    await test_weight_loading(dut)
     
     # --------------------------
     # Test 3: Full Network Inference
@@ -45,9 +45,10 @@ async def test_tt_um_BNN(dut):
     # await test_network_inference(dut)
 
 async def test_hardcoded_weights(dut):
-    """Test that initial hardcoded weights produce correct outputs"""
+    # Test initial hard-coded weights
     cocotb.log.info("Testing hardcoded weights")
     
+    # A single test 0b11110000 is provided, more could be added later
     # Test pattern that should activate neuron 0 (weights = 11110000)
     test_input = 0b11110000
     expected_output = 0b1000  # Only first neuron of last layer should activate
@@ -64,7 +65,7 @@ async def test_weight_loading(dut):
     dut.uio_in.value = 0b00001000  # Set bit 3 (load_en) high
     
     # Test loading weights for neuron 0
-    new_weights = 0b10100101
+    new_weights = 0b00000000
     await load_weights(dut, neuron_idx=0, weights=new_weights)
     
     # Verify by testing inference
@@ -76,8 +77,7 @@ async def test_weight_loading(dut):
     await RisingEdge(dut.clk)
     await Timer(1, units="ns")
     
-    if int(dut.uo_out.value) != expected_output:
-        raise TestFailure(f"Weight loading test failed. Got {dut.uo_out.value}, expected {expected_output}")
+    assert int(dut.uo_out.value) == expected_output, f"Weight loading test failed. Got {dut.uo_out.value}, expected {expected_output}"
 
 async def load_weights(dut, neuron_idx, weights):
     """Helper function to load weights for a specific neuron"""
@@ -88,11 +88,11 @@ async def load_weights(dut, neuron_idx, weights):
     # Load upper 4 bits
     dut.uio_in.value = (weights >> 4) << 4 | 0b1000
     await RisingEdge(dut.clk)
-    
+
     cocotb.log.info(f"Loaded weights {bin(weights)} to neuron {neuron_idx}")
 
 async def test_network_inference(dut):
-    """Test complete network inference with random inputs"""
+    # Simulates the complete process using python here
     cocotb.log.info("Testing network inference")
     
     # Test 10 random patterns
@@ -109,8 +109,7 @@ async def test_network_inference(dut):
         await Timer(1, units="ns")
         
         # Verify output
-        if int(dut.uo_out.value) != expected:
-            raise TestFailure(f"Inference failed for input {bin(test_input)}. Got {dut.uo_out.value}, expected {expected}")
+        assert int(dut.uo_out.value) == expected, f"Inference failed for input {bin(test_input)}. Got {dut.uo_out.value}, expected {expected}"
 
 def calculate_expected_output(input_val):
     """Calculate expected output based on hardcoded weights"""
