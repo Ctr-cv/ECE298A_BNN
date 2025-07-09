@@ -35,40 +35,24 @@ wire [3:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 4-bit sums
 reg [3:0] temp_weight; // used as a buffer for weight loading
 reg bit_index; // Used for weight loading. 0: lower 4 bits, 1: upper 4 bits
 
-
-// initial only works in simulation, may need to change later
-initial begin
-    // initialize hard-coded weights and thresholds for all neurons.
-    // note that you'll need to delete or add weights depending on NUM_NEURONS
-    // First layer: 8 neurons
-    weights[0] = 8'b11111111; thresholds[0] = 4'b0000;
-    weights[1] = 8'b00001111; thresholds[1] = 4'b0000;
-    weights[2] = 8'b00111100; thresholds[2] = 4'b0000;
-    weights[3] = 8'b11000011; thresholds[3] = 4'b0000;
-    weights[4] = 8'b11110000; thresholds[4] = 4'b0000;
-    weights[5] = 8'b00001111; thresholds[5] = 4'b0000;
-    weights[6] = 8'b00111100; thresholds[6] = 4'b0000;
-    weights[7] = 8'b11000011; thresholds[7] = 4'b0000;
-    // Second layer: 4 neurons
-    weights[8] = 8'b11110000; thresholds[8] = 4'b0100;
-    weights[9] = 8'b00001111; thresholds[9] = 4'b0100;
-    weights[10] = 8'b00111100; thresholds[10] = 4'b0100;
-    weights[11] = 8'b11000011; thresholds[11] = 4'b0100;
-    // weights[12] = 8'b11110000; thresholds[12] = 4'b0100;
-    // weights[13] = 8'b00110000; thresholds[13] = 4'b0100;
-    // weights[14] = 8'b10100000; thresholds[14] = 4'b0100;
-    // weights[15] = 8'b11000011; thresholds[15] = 4'b0100;
-    // // Third layer: 4 neurons NO THIRD LAYER
-    // weights[16] = 8'b11110000; thresholds[16] = 4'b0100;
-    // weights[17] = 8'b00110000; thresholds[17] = 4'b0100;
-    // weights[18] = 8'b10100000; thresholds[18] = 4'b0100;
-    // weights[19] = 8'b11000011; thresholds[19] = 4'b0100;
-end
-
 // -------------- Weight Loading for all layers ----------------------------
 // NOTE: each neuron takes 2 clock cycles to load, needs to set load_enable high for at least 2 cycles
 always @(posedge clk or posedge reset) begin
+  // constant weight loading
   if (reset) begin
+    weights[0] <= 8'b11111111;
+    weights[1] <= 8'b00001111;
+    weights[2] <= 8'b00111100;
+    weights[3] <= 8'b11000011;
+    weights[4] <= 8'b11110000;
+    weights[5] <= 8'b00001111;
+    weights[6] <= 8'b00111100;
+    weights[7] <= 8'b11000011;
+    // Second layer: 4 neurons
+    weights[8] <= 8'b11110000;
+    weights[9] <= 8'b00001111;
+    weights[10] <= 8'b00111100;
+    weights[11] <= 8'b11000011;
     load_state <= 0;
     temp_weight <= 8'b00000000;
     bit_index <= 0;
