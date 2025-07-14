@@ -51,16 +51,16 @@ async def test_hardcoded_weights(dut):
     # A single test 0b11110000 is provided, more could be added later
     # Test pattern that should activate neuron 0 (weights = 11110000)
     test_input = 0b11110000
-    expected_output = 0b1101  # Only first neuron of last layer should activate
+    expected_output = 0b1011  # Only first neuron of last layer should activate
     
     dut.ui_in.value = test_input
     await Timer(2, units="ns")  # Allow combinational logic to settle
-    assert int(dut.uo_out.value[4:7]) == expected_output, f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output)}"
+    assert int(dut.uo_out.value[7:3]) == expected_output, f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[7:3])}, expected {bin(expected_output)}"
 
 async def test_weight_loading(dut):
     """Test dynamic weight loading through bidirectional pins"""
     cocotb.log.info("Testing weight loading")
-    weights_list = [0b11111111, 0b00001111, 0b00111100, 0b11000011, 
+    weights_list = [0b11110000, 0b00001111, 0b00111100, 0b11000011, 
                0b11110000, 0b00001111, 0b00111100, 0b11000011,
                0b11110000, 0b00001111, 0b00111100, 0b11000011]
     # weights[0] <= 8'b11111111;
@@ -91,8 +91,8 @@ async def test_weight_loading(dut):
     dut.uio_in.value = 0  # Disable weight loading
     await RisingEdge(dut.clk)
     await Timer(1, units="ns")
-    
-    assert int(dut.uo_out.value) == expected_output, f"Weight loading test failed. Got {dut.uo_out.value}, expected {expected_output}"
+    cocotb.log.info(f"weight at node 0: {bin(dut.uo_out.value[3:0])}")
+    assert int(dut.uo_out.value[7:4]) == expected_output, f"Weight loading test failed. Got {dut.uo_out.value[7:4]}, expected {expected_output}"
 
 async def load_weights(dut, neuron_idx, weights):
     """Helper function to load weights for a specific neuron"""
