@@ -91,7 +91,7 @@ async def test_weight_loading(dut):
     dut.uio_in.value = 0  # Disable weight loading
     await RisingEdge(dut.clk)
     await Timer(1, units="ns")
-    cocotb.log.info(f"weight at node 0: {bin(dut.uo_out.value[3:0])}")
+    cocotb.log.info(f"weight at node 0: {bin(dut.uo_out.value[0:3:-1])}")
     assert int(dut.uo_out.value[4:7:-1]) == expected_output, f"Weight loading test failed. Got {dut.uo_out.value[4:7:-1]}, expected {expected_output}"
 
 async def load_weights(dut, neuron_idx, weights):
