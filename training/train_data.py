@@ -61,24 +61,15 @@ print("Dataset saved as 'Learnable_Rules_Dataset.csv'")
 X = df[[f"in{i}" for i in range(8)]].values.astype(np.float32)
 y = df["label"].values.astype(np.int32)
 
-# 4. Build 8-8-8-4 BNN model
 model = tf.keras.Sequential([
+    # Input → Hidden layer (8 neurons)
     lq.layers.QuantDense(8,
                          input_dim=8,
                          kernel_quantizer="ste_sign",
                          kernel_constraint="weight_clip",
                          use_bias=True),
 
-    lq.layers.QuantDense(8,
-                         kernel_quantizer="ste_sign",
-                         kernel_constraint="weight_clip",
-                         use_bias=True),
-
-    lq.layers.QuantDense(8,
-                         kernel_quantizer="ste_sign",
-                         kernel_constraint="weight_clip",
-                         use_bias=True),
-
+    # Output layer (4 neurons)
     tf.keras.layers.Dense(4, activation="softmax")
 ])
 
