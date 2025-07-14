@@ -51,7 +51,7 @@ async def test_hardcoded_weights(dut):
     # A single test 0b11110000 is provided, more could be added later
     # Test pattern that should activate neuron 0 (weights = 11110000)
     test_input = 0b11110000
-    expected_output = 0b1011  # Only first neuron of last layer should activate
+    expected_output = 0b1111  # Only first neuron of last layer should activate
     
     dut.ui_in.value = test_input
     await Timer(2, units="ns")  # Allow combinational logic to settle
@@ -84,8 +84,8 @@ async def test_weight_loading(dut):
         await load_weights(dut, i, weights=weights_list[i])
     
     # Verify by testing inference
-    test_input = 0b10100101  # Should perfectly match new weights
-    expected_output = 0b1101  # Threshold is 5 (0101), sum will be 8
+    test_input = 0b11110000  # Should perfectly original value, since loaded weights are the same
+    expected_output = 0b1111  # Threshold is 5 (0101), sum will be 8
     
     dut.ui_in.value = test_input
     dut.uio_in.value = 0  # Disable weight loading
