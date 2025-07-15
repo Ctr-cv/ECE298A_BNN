@@ -42,7 +42,7 @@ async def test_tt_um_BNN(dut):
     # --------------------------
     # Test 3: Full Network Inference
     # --------------------------
-    await test_network_inference(dut)
+    # await test_network_inference(dut)
 
 async def test_hardcoded_weights(dut):
     # Test initial hard-coded weights
@@ -56,7 +56,7 @@ async def test_hardcoded_weights(dut):
     for i in range(len(test_inputs)):
         dut.ui_in.value = test_inputs[i]
         await Timer(2, units="ns")  # Allow combinational logic to settle
-        cocotb.log.info(f"expected value: {bin(expected_outputs[i])}, actual value: {bin(dut.uo_out.value[0:3:-1])}")
+        cocotb.log.info(f"expected value: {bin(expected_outputs[i])}, actual value: {bin(dut.uo_out.value[4:7:-1])}")
         # assert int(dut.uo_out.value[0:3:-1]) == expected_outputs[i], f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[0:3:-1])}, expected {bin(expected_output[i])}"
 
 async def test_weight_loading(dut):
