@@ -40,6 +40,7 @@ reg bit_index; // Used for weight loading. 0: lower 4 bits, 1: upper 4 bits
 always @(posedge clk or posedge reset) begin
   // constant weight loading
   if (reset) begin
+    // goes from 7th -> 0th bit
     weights[0] <= 8'b10100000;
     weights[1] <= 8'b01000001;
     weights[2] <= 8'b01111010;
@@ -54,7 +55,7 @@ always @(posedge clk or posedge reset) begin
     weights[10] <= 8'b11110111;
     weights[11] <= 8'b00001111;
     load_state <= 0;
-    temp_weight <= 8'b00000000;
+    temp_weight <= 8'b0000;
     bit_index <= 0;
   end else if (ena && uio_in[3]) begin  // Use bidir pin to trigger loading
     if (bit_index == 0) begin
@@ -147,7 +148,8 @@ endgenerate
 
 // --------------- Output Assignment ----------------------------
 // -------------- Dedicated Outputs ----------------------------
-assign uo_out[7:0] = {neuron_out1[3:0], neuron_out3};  // 4 neuron outputs
+// assign uo_out[7:0] = {neuron_out1[3:0], neuron_out3};  // 4 neuron outputs
+assign uo_out[7:0] = {neuron_out1[7:0]};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)
