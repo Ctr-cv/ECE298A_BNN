@@ -58,7 +58,7 @@ async def test_hardcoded_weights(dut):
         await Timer(2, units="ns")  # Allow combinational logic to settle
         cocotb.log.info(f"layer1 [0:3]:{bin(dut.uo_out.value[0:3:-1])}")
         cocotb.log.info(f"expected value: {bin(expected_outputs[i])}, actual value: {bin(dut.uo_out.value[4:7:-1])}")
-        # assert int(dut.uo_out.value[0:3:-1]) == expected_outputs[i], f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[0:3:-1])}, expected {bin(expected_output[i])}"
+        assert int(dut.uo_out.value[4:7:-1]) == expected_outputs[i], f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7:-1])}, expected {bin(expected_output[i])}"
 
 async def test_weight_loading(dut):
     """Test dynamic weight loading through bidirectional pins"""
