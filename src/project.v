@@ -26,7 +26,7 @@ localparam thresholds = 6;
 
 wire reset = ~rst_n; // use active-high reset
 
-reg [7:0] input [0:NUM_NEURONS-1]; // input register
+// reg [7:0] input [0:NUM_NEURONS-1]; // input register
 
 // 8-bits weight per 4 neurons, declared here
 reg [2*NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // neuron 0 takes [7:0] weights at index 0, and etc.
