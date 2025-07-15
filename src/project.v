@@ -26,10 +26,12 @@ localparam thresholds = 6;
 
 wire reset = ~rst_n; // use active-high reset
 
+reg [7:0] input [0:NUM_NEURONS-1]; // input register
+
 // 8-bits weight per 4 neurons, declared here
 reg [2*NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // neuron 0 takes [7:0] weights at index 0, and etc.
 
-reg [4:0] load_state; // Used for weight-loading to indicate # neuron.
+reg load_state[0:NUM_NEURONS-1]; // Used for weight-loading to indicate # neuron.
 wire [3:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 4-bit sums
 
 reg [3:0] temp_weight; // used as a buffer for weight loading
@@ -78,17 +80,14 @@ generate
     assign sums[i] = {3'b000, (ui_in[0] ~^ weights[i][0])} + 
                      {3'b000, (ui_in[1] ~^ weights[i][1])} +
                      {3'b000, (ui_in[2] ~^ weights[i][2])} +
-                     {3'b000, (ui_in[3] ~^ weights[i][3])} + 
-                     {3'b000, (ui_in[4] ~^ weights[i][4])} + 
+                     {3'b000, (ui_in[3] ~^ weights[i][3])} +
+                     {3'b000, (ui_in[4] ~^ weights[i][4])} +
                      {3'b000, (ui_in[5] ~^ weights[i][5])} +
                      {3'b000, (ui_in[6] ~^ weights[i][6])} +
                      {3'b000, (ui_in[7] ~^ weights[i][7])};
   end
-endgenerate
-
 // ----------------- Threshold Activation -------------------------
 wire [7:0] neuron_out1;
-generate
   for (i = 0; i < 8; i = i + 1) begin : activation1
     assign neuron_out1[i] = (sums[i] >= thresholds);
   end
