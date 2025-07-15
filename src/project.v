@@ -31,7 +31,7 @@ wire reset = ~rst_n; // use active-high reset
 // 8-bits weight per 4 neurons, declared here
 reg [2*NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // neuron 0 takes [7:0] weights at index 0, and etc.
 
-reg load_state[0:NUM_NEURONS-1]; // Used for weight-loading to indicate # neuron.
+reg [4:0] load_state; // Used for weight-loading to indicate # neuron.
 wire [3:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 4-bit sums
 
 reg [3:0] temp_weight; // used as a buffer for weight loading
