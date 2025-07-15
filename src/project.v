@@ -93,7 +93,7 @@ wire [7:0] neuron_out1;
   end
 endgenerate
 
-assign uo_out[7:0] = {neuron_out1};  // 4 neuron outputs
+assign uo_out[7:0] = {neuron_out1[7:0]};  // 4 neuron outputs
 
 // // ------------------------ Layer 2 ------------------------------
 // // ------------------ XNOR-Popcount Calculation ------------------
