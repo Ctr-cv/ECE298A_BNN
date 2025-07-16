@@ -125,7 +125,7 @@ endgenerate
 // -------------- Dedicated Outputs ----------------------------
 // assign uo_out[7:0] = {neuron_out1[3:0], neuron_out3};  // 4 neuron outputs
 // assign uo_out[7:0] = {neuron_out3[3:0], neuron_out1[3:0]};  // 4 neuron outputs
-assign uo_out[7:0] = {4'b0000, neuron_out1[3:0]};  // 4 neuron outputs
+assign uo_out[7:0] = {4'b0000, neuron_out3[3:0]};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)
