@@ -111,11 +111,8 @@ generate
                      {3'b000, (neuron_out1[1] ~^ weights[k][6])} +
                      {3'b000, (neuron_out1[0] ~^ weights[k][7])};
   end
-endgenerate
-
-// ----------------- Threshold Activation -------------------------
+// ----------------- Threshold Activation -------------------------  just edited out generate, put back if needed
 wire [3:0] neuron_out3;
-generate
   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation3
     assign neuron_out3[k-8] = (sums[k] >= thresholds);
   end
