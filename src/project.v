@@ -93,7 +93,11 @@ wire [7:0] neuron_out1;
   end
 endgenerate
 
-assign uo_out[7:0] = {neuron_out1[7:0]};  // 4 neuron outputs
+reg [7:0] neuron_out1_reg;
+always @(posedge clk or posedge reset) begin
+  if (reset) neuron_out1_reg <= 8'b0;
+  else neuron_out1_reg <= neuron_out1;
+end
 
 // ------------------------ Layer 2 (actual) ------------------------------
 // ------------------ XNOR-Popcount Calculation ------------------
@@ -102,14 +106,14 @@ generate
   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron3
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
-    assign sums[k] = {3'b000, (neuron_out1[7] ~^ weights[k][0])} +
-                     {3'b000, (neuron_out1[6] ~^ weights[k][1])} +
-                     {3'b000, (neuron_out1[5] ~^ weights[k][2])} +
-                     {3'b000, (neuron_out1[4] ~^ weights[k][3])} + 
-                     {3'b000, (neuron_out1[3] ~^ weights[k][4])} +
-                     {3'b000, (neuron_out1[2] ~^ weights[k][5])} +
-                     {3'b000, (neuron_out1[1] ~^ weights[k][6])} +
-                     {3'b000, (neuron_out1[0] ~^ weights[k][7])};
+    assign sums[k] = {3'b000, (neuron_out1_reg[7] ~^ weights[k][0])} +
+                     {3'b000, (neuron_out1_reg[6] ~^ weights[k][1])} +
+                     {3'b000, (neuron_out1_reg[5] ~^ weights[k][2])} +
+                     {3'b000, (neuron_out1_reg[4] ~^ weights[k][3])} + 
+                     {3'b000, (neuron_out1_reg[3] ~^ weights[k][4])} +
+                     {3'b000, (neuron_out1_reg[2] ~^ weights[k][5])} +
+                     {3'b000, (neuron_out1_reg[1] ~^ weights[k][6])} +
+                     {3'b000, (neuron_out1_reg[0] ~^ weights[k][7])};
   end
 // ----------------- Threshold Activation -------------------------  just edited out generate, put back if needed
 wire [3:0] neuron_out3;
@@ -118,11 +122,15 @@ wire [3:0] neuron_out3;
   end
 endgenerate
 
+reg [3:0] neuron_out3_reg;
+always @(posedge clk or posedge reset) begin
+  if (reset) neuron_out3_reg <= 4'b0000;
+  else neuron_out3_reg <= neuron_out3;
+end
+
 // --------------- Output Assignment ----------------------------
 // -------------- Dedicated Outputs ----------------------------
-// assign uo_out[7:0] = {neuron_out1[3:0], neuron_out3};  // 4 neuron outputs
-// assign uo_out[7:0] = {neuron_out3[3:0], neuron_out1[3:0]};  // 4 neuron outputs
-assign uo_out[7:0] = {4'b0000, neuron_out3[3:0]};  // 4 neuron outputs
+assign uo_out[7:0] = {4'b0000, neuron_out3_reg[3:0]};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)

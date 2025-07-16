@@ -56,7 +56,8 @@ async def test_hardcoded_weights(dut):
     
     for i in range(len(test_inputs)):
         dut.ui_in.value = test_inputs[i]
-        await Timer(1, units="ns")  # Allow combinational logic to settle
+        await RisingEdge(dut.clk)  # Cycle 1 post-reset
+        await RisingEdge(dut.clk)  # Cycle 2 post-reset
         cocotb.log.info(f"layer3 [7:0]:{dut.uo_out.value.binstr}")
         # cocotb.log.info(f"expected value: {bin(expected_outputs[i])}, actual value: {bin(dut.uo_out.value[4:7])}")
         # assert int(dut.uo_out.value[4:7]) == expected_outputs[i], f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output[i])}"
