@@ -50,12 +50,36 @@ async def test_hardcoded_weights(dut):
     
     # A single test 0b11110000 is provided, more could be added later
     # Test pattern that should activate neuron 0 (weights = 11110000)
-    test_inputs = [0b00000001, 0b01011011, 0b10011001, 0b11110101] # left, stop, right, uturn
+    stop_patterns = [
+        [0, 0, 0, 0, 0, 0, 0, 1],  # Row 2
+        [0, 0, 0, 0, 0, 0, 1, 0],  # Row 3
+        [0, 0, 0, 0, 0, 0, 1, 1],  # Row 4
+        [0, 0, 0, 0, 0, 1, 0, 0],  # Row 5
+        [0, 0, 0, 0, 0, 1, 0, 1],  # Row 6
+        [0, 0, 0, 0, 0, 1, 1, 0],  # Row 7
+        [0, 0, 0, 0, 0, 1, 1, 1],  # Row 8
+        [0, 0, 0, 0, 1, 0, 0, 1],  # Row 10
+        [0, 0, 0, 0, 1, 0, 1, 0],  # Row 11
+        [0, 0, 0, 0, 1, 0, 1, 1],  # Row 12
+        [0, 0, 0, 0, 1, 1, 0, 0],  # Row 13
+        [0, 0, 0, 0, 1, 1, 0, 1],  # Row 14
+        [0, 0, 0, 0, 1, 1, 1, 0],  # Row 15
+        [0, 0, 0, 0, 1, 1, 1, 1],  # Row 16
+        [0, 0, 0, 1, 0, 0, 0, 1],  # Row 18
+        [0, 0, 0, 1, 0, 0, 1, 0]   # Row 19
+    ]
+
+    left_patterns = [
+        [0, 0, 0, 0, 0, 0, 0, 0],  # Row 1
+        [0, 0, 0, 0, 1, 0, 0, 0],  # Row 9
+        [0, 0, 0, 1, 1, 0, 0, 0],  # Row 25
+        [1, 0, 0, 0, 0, 0, 0, 0]   # Row 129
+    ]
     # test_inputs = [0b00000000, 0b00111111, 0b11111111, 0b01100000] # left, stop, right, uturn
     expected_outputs = [0b1000, 0b0001, 0b0100, 0b0010]  # Expected output for each one
     
-    for i in range(len(test_inputs)):
-        dut.ui_in.value = test_inputs[i]
+    for i in range(len(stop_patterns)):
+        dut.ui_in.value = stop_patterns[i]
         await RisingEdge(dut.clk)  # Cycle 1 post-reset
         await RisingEdge(dut.clk)  # Cycle 2 post-reset
         cocotb.log.info(f"layer3 [7:0]:{dut.uo_out.value.binstr}")
