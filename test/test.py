@@ -50,7 +50,7 @@ async def test_hardcoded_weights(dut):
     
     # A single test 0b11110000 is provided, more could be added later
     # Test pattern that should activate neuron 0 (weights = 11110000)
-    test_inputs = [0b00000000, 0b00001110, 0b01001000, 0b01100000] # left, stop, right, uturn
+    test_inputs = [0b00000001, 0b01011011, 0b10011001, 0b11110101] # left, stop, right, uturn
     # test_inputs = [0b00000000, 0b00111111, 0b11111111, 0b01100000] # left, stop, right, uturn
     expected_outputs = [0b1000, 0b0001, 0b0100, 0b0010]  # Expected output for each one
     
