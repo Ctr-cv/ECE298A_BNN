@@ -95,62 +95,36 @@ endgenerate
 
 assign uo_out[7:0] = {neuron_out1[7:0]};  // 4 neuron outputs
 
-// // ------------------------ Layer 2 ------------------------------
-// // ------------------ XNOR-Popcount Calculation ------------------
-// // genvar j;
-// // generate
-// //   for (j = 8; j < 16; j = j + 1) begin : neuron2
-// //     // XNOR each input bit with weight, then sum
-// //     // Note, here only last 4 bits of weights are taken from weights[7:4].
-// //     assign sums[j] = {3'b000, (neuron_out1[0] ~^ weights[j][0])} +
-// //                      {3'b000, (neuron_out1[1] ~^ weights[j][1])} +
-// //                      {3'b000, (neuron_out1[2] ~^ weights[j][2])} +
-// //                      {3'b000, (neuron_out1[3] ~^ weights[j][3])} + 
-// //                      {3'b000, (neuron_out1[4] ~^ weights[j][4])} +
-// //                      {3'b000, (neuron_out1[5] ~^ weights[j][5])} +
-// //                      {3'b000, (neuron_out1[6] ~^ weights[j][6])} +
-// //                      {3'b000, (neuron_out1[7] ~^ weights[j][7])};
-// //   end
-// // endgenerate
+// ------------------------ Layer 2 (actual) ------------------------------
+// ------------------ XNOR-Popcount Calculation ------------------
+genvar k;
+generate
+  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron3
+    // XNOR each input bit with weight, then sum
+    // Note, here only last 4 bits of weights are taken from weights[7:4].
+    assign sums[k] = {3'b000, (neuron_out1[7] ~^ weights[k][0])} +
+                     {3'b000, (neuron_out1[6] ~^ weights[k][1])} +
+                     {3'b000, (neuron_out1[5] ~^ weights[k][2])} +
+                     {3'b000, (neuron_out1[4] ~^ weights[k][3])} + 
+                     {3'b000, (neuron_out1[3] ~^ weights[k][4])} +
+                     {3'b000, (neuron_out1[2] ~^ weights[k][5])} +
+                     {3'b000, (neuron_out1[1] ~^ weights[k][6])} +
+                     {3'b000, (neuron_out1[0] ~^ weights[k][7])};
+  end
+endgenerate
 
-// // // ----------------- Threshold Activation -------------------------
-// // wire [7:0] neuron_out2;
-// // generate
-// //   for (j = 8; j < 16; j = j + 1) begin : activation2
-// //     assign neuron_out2[j-8] = (sums[j] >= thresholds[j]);
-// //   end
-// // endgenerate
+// ----------------- Threshold Activation -------------------------
+wire [3:0] neuron_out3;
+generate
+  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation3
+    assign neuron_out3[k-8] = (sums[k] >= thresholds);
+  end
+endgenerate
 
-// // ------------------------ Layer 2 (actual) ------------------------------
-// // ------------------ XNOR-Popcount Calculation ------------------
-// genvar k;
-// generate
-//   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron3
-//     // XNOR each input bit with weight, then sum
-//     // Note, here only last 4 bits of weights are taken from weights[7:4].
-//     assign sums[k] = {3'b000, (neuron_out1[0] ~^ weights[k][0])} +
-//                      {3'b000, (neuron_out1[1] ~^ weights[k][1])} +
-//                      {3'b000, (neuron_out1[2] ~^ weights[k][2])} +
-//                      {3'b000, (neuron_out1[3] ~^ weights[k][3])} + 
-//                      {3'b000, (neuron_out1[4] ~^ weights[k][4])} +
-//                      {3'b000, (neuron_out1[5] ~^ weights[k][5])} +
-//                      {3'b000, (neuron_out1[6] ~^ weights[k][6])} +
-//                      {3'b000, (neuron_out1[7] ~^ weights[k][7])};
-//   end
-// endgenerate
-
-// // ----------------- Threshold Activation -------------------------
-// wire [3:0] neuron_out3;
-// generate
-//   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation3
-//     assign neuron_out3[k-8] = (sums[k] >= thresholds);
-//   end
-// endgenerate
-
-// // --------------- Output Assignment ----------------------------
-// // -------------- Dedicated Outputs ----------------------------
-// // assign uo_out[7:0] = {neuron_out1[3:0], neuron_out3};  // 4 neuron outputs
-// assign uo_out[7:0] = {neuron_out1[7:0]};  // 4 neuron outputs
+// --------------- Output Assignment ----------------------------
+// -------------- Dedicated Outputs ----------------------------
+// assign uo_out[7:0] = {neuron_out1[3:0], neuron_out3};  // 4 neuron outputs
+assign uo_out[7:0] = {neuron_out3[3:0], neuron_out1[3:0]};  // 4 neuron outputs
 
 // --- Cleaning unused pins ---
 assign uio_out = 8'b00000000;      // Unused (set to 0)
