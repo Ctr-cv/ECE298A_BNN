@@ -77,8 +77,8 @@ async def test_hardcoded_weights(dut):
     # test_inputs = [0b00000000, 0b00111111, 0b11111111, 0b01100000] # left, stop, right, uturn
     expected_outputs = [0b1000, 0b0001, 0b0100, 0b0010]  # Expected output for each one
     
-    for i in range(len(stop_patterns)):
-        dut.ui_in.value = stop_patterns[i]
+    for i in range(len(left_patterns)):
+        dut.ui_in.value = left_patterns[i]
         await RisingEdge(dut.clk)  # Cycle 1 post-reset
         await RisingEdge(dut.clk)  # Cycle 2 post-reset
         cocotb.log.info(f"layer3 [7:0]:{dut.uo_out.value.binstr}")
