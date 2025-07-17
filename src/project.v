@@ -108,14 +108,14 @@ generate
   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron3
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
-    assign sums[k] = {3'b000, (neuron_out1_reg[7] ~^ weights[k][0])} +
-                     {3'b000, (neuron_out1_reg[6] ~^ weights[k][1])} +
-                     {3'b000, (neuron_out1_reg[5] ~^ weights[k][2])} +
-                     {3'b000, (neuron_out1_reg[4] ~^ weights[k][3])} + 
-                     {3'b000, (neuron_out1_reg[3] ~^ weights[k][4])} +
-                     {3'b000, (neuron_out1_reg[2] ~^ weights[k][5])} +
-                     {3'b000, (neuron_out1_reg[1] ~^ weights[k][6])} +
-                     {3'b000, (neuron_out1_reg[0] ~^ weights[k][7])};
+    assign sums[k] = {3'b000, (neuron_out1_reg[0] ~^ weights[k][0])} +
+                     {3'b000, (neuron_out1_reg[1] ~^ weights[k][1])} +
+                     {3'b000, (neuron_out1_reg[2] ~^ weights[k][2])} +
+                     {3'b000, (neuron_out1_reg[3] ~^ weights[k][3])} + 
+                     {3'b000, (neuron_out1_reg[4] ~^ weights[k][4])} +
+                     {3'b000, (neuron_out1_reg[5] ~^ weights[k][5])} +
+                     {3'b000, (neuron_out1_reg[6] ~^ weights[k][6])} +
+                     {3'b000, (neuron_out1_reg[7] ~^ weights[k][7])};
   end
 // ----------------- Threshold Activation -------------------------  just edited out generate, put back if needed
 wire [3:0] neuron_out3;
