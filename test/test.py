@@ -74,7 +74,6 @@ async def test_hardcoded_weights(dut):
         0b00011000,  # Row 25
         0b10000000   # Row 129
     ]
-    expected_outputs = [0b1000, 0b0001, 0b0100, 0b0010]  # Expected output for each one
     
     for i in range(len(left_patterns)):
         dut.ui_in.value = left_patterns[i]
