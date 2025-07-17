@@ -51,22 +51,14 @@ async def test_hardcoded_weights(dut):
     # A single test 0b11110000 is provided, more could be added later
     # Test pattern that should activate neuron 0 (weights = 11110000)
     stop_patterns = [
-        0b00000001,  # Row 2
-        0b00000010,  # Row 3
-        0b00000011,  # Row 4
-        0b00000100,  # Row 5
-        0b00000101,  # Row 6
-        0b00000110,  # Row 7
-        0b00000111,  # Row 8
-        0b00001001,  # Row 10
-        0b00001010,  # Row 11
-        0b00001011,  # Row 12
-        0b00001100,  # Row 13
-        0b00001101,  # Row 14
-        0b00001110,  # Row 15
-        0b00001111,  # Row 16
-        0b00010001,  # Row 18
-        0b00010010   # Row 19
+        0b00101101,  # Row 2
+        0b10010101,  # Row 3
+        0b11010001,  # Row 4
+        0b10011001,  # Row 5
+        0b10000011,  # Row 6
+        0b10111100,  # Row 7
+        0b00101001,  # Row 8
+        0b11001011,  # Row 10
     ]
     left_patterns = [
         0b00000000,  # Row 1

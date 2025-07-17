@@ -144,7 +144,7 @@ for bits, desc in test_cases:
     print(f"Input {bits} ({desc}) => Action: {action_map[action]}")
 
 # 12. Save the model
-model.save("8x8x8x4_bnn_controller.h5")
+model.save("8x8x4_bnn_controller.h5")
 
 # 13. Model summary
 print("\nModel Summary:")

@@ -43,19 +43,19 @@ always @(posedge clk or posedge reset) begin
   // constant weight loading
   if (reset) begin
     // goes from 7th -> 0th bit
-    weights[0] <= 8'b10100000;
-    weights[1] <= 8'b01000001;
-    weights[2] <= 8'b01111010;
-    weights[3] <= 8'b00011000;
-    weights[4] <= 8'b11101101;
-    weights[5] <= 8'b10110111;
-    weights[6] <= 8'b01100111;
-    weights[7] <= 8'b00111010;
+    weights[0] <= 8'b11010111;
+    weights[1] <= 8'b10000110;
+    weights[2] <= 8'b11111001;
+    weights[3] <= 8'b10001111;
+    weights[4] <= 8'b11100100;
+    weights[5] <= 8'b10101001;
+    weights[6] <= 8'b11101000;
+    weights[7] <= 8'b10111000;
     // Second layer: 4 neurons
-    weights[8] <= 8'b11111001;
-    weights[9] <= 8'b01100010;
-    weights[10] <= 8'b11110111;
-    weights[11] <= 8'b00001111;
+    weights[8] <= 8'b01010001;
+    weights[9] <= 8'b00000110;
+    weights[10] <= 8'b00001001;
+    weights[11] <= 8'b10011010;
     load_state <= 0;
     temp_weight <= 8'b0000;
     bit_index <= 0;
