@@ -72,6 +72,8 @@ async def test_hardcoded_weights(dut):
         await RisingEdge(dut.clk)  # Cycle 1 post-reset
         await RisingEdge(dut.clk)  # Cycle 2 post-reset
         await RisingEdge(dut.clk)  # Cycle 3 just in case
+        await RisingEdge(dut.clk)  # Cycle 4 just in case
+        await RisingEdge(dut.clk)  # Cycle 5 just in case
         cocotb.log.info(f"layer3 [7:0]:{dut.uo_out.value.binstr}")
         # cocotb.log.info(f"expected value: {bin(expected_outputs[i])}, actual value: {bin(dut.uo_out.value[4:7])}")
         # assert int(dut.uo_out.value[4:7]) == expected_outputs[i], f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output[i])}"
