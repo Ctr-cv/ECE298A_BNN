@@ -32,17 +32,12 @@ async def test_tt_um_BNN(dut):
     # --------------------------
     # Test 1: Verify Hardcoded Weights
     # --------------------------
-    # await test_hardcoded_weights(dut)
+    await test_hardcoded_weights(dut)
     
     # --------------------------
     # Test 2: Dynamic Weight Loading
     # --------------------------
     await test_weight_loading(dut)
-    
-    # --------------------------
-    # Test 3: Full Network Inference
-    # --------------------------
-    # await test_network_inference(dut)
 
 async def test_hardcoded_weights(dut):
     # Test initial hard-coded weights
@@ -103,54 +98,3 @@ async def load_weights(dut, neuron_idx, weights):
     await RisingEdge(dut.clk)
 
     cocotb.log.info(f"Loaded weights {bin(weights)} to neuron {neuron_idx}")
-
-async def test_network_inference(dut):
-    # Simulates the complete process using python here
-    cocotb.log.info("Testing network inference")
-    
-    # Test 10 random patterns
-    for _ in range(10):
-        # Generate random input
-        test_input = random.randint(0, 255)
-        
-        # Calculate expected output (based on hardcoded weights)
-        expected = calculate_expected_output(test_input)
-        
-        # Apply input
-        dut.ui_in.value = test_input
-        await RisingEdge(dut.clk)
-        await Timer(1, units="ns")
-        
-        # Verify output
-        assert int(dut.uo_out.value) == expected, f"Inference failed for input {bin(test_input)}. Got {dut.uo_out.value}, expected {expected}"
-
-def calculate_expected_output(input_val):
-    """Calculate expected output based on hardcoded weights"""
-    # Layer 1 weights (first 8 neurons)
-    layer1_weights = [ 0b10100000, 0b01000001, 0b01111010, 0b00011000,
-        0b11101101, 0b10110111, 0b01100111, 0b00111010]
-    
-    # Layer 2 weights (neurons 8-11)
-    layer2_weights = [0b11111001, 0b01100010, 0b11110111, 0b00001111]
-    
-    # Threshold for all neurons is 5 (0101)
-    threshold = 5
-    
-    # Layer 1 computation
-    layer1_output = 0
-    for i in range(8):
-        matches = bin(input_val ^ layer1_weights[i]).count('0')
-        if matches >= threshold:
-            layer1_output |= (1 << i)
-    
-    # Layer 2 computation
-    final_output = 0
-    for i in range(4):
-        # Compare with bits [4:7] of weights (per your code)
-        weight_part = (layer2_weights[i] >> 4) & 0x0F
-        input_part = layer1_output
-        matches = bin(input_part ^ weight_part).count('0')
-        if matches >= threshold:
-            final_output |= (1 << i)
-    
-    return final_output
