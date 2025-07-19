@@ -56,7 +56,7 @@ always @(posedge clk or posedge reset) begin
     weights[8] <= 8'b00000011;
     weights[9] <= 8'b00001100;
     weights[10] <= 8'b00110000;
-    weights[11] <= 8'b11000000;
+    weights[11] <= 8'b10000000;
     load_state <= 0;
     temp_weight <= 8'b0000;
     bit_index <= 0;
