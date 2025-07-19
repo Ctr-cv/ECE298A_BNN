@@ -22,7 +22,7 @@ module tt_um_BNN (
 // --------------- Constants set for BNN ------------------------
 localparam NUM_NEURONS = 12;
 localparam NUM_WEIGHTS = 4;
-localparam thresholds = 4;
+localparam thresholds = 8;
 
 wire reset = ~rst_n; // use active-high reset
 

@@ -60,33 +60,18 @@ async def test_hardcoded_weights(dut):
         0b00101001,  # Row 8
         0b11001011,  # Row 10
     ]
-    left_patterns = [
-        0b00000000,  # Row 1
-        0b00001000,  # Row 9
-        0b00010000,  # Row 25
-        0b00011000,   # Row 129
-        0b00100000,
-        0b00101000,
-        0b00110000,
-        0b00111000,
-        0b10000000,
-        0b10001000,
-        0b10010000,
-        0b10011000,
-        0b10100000,
-        0b10101000,
-        0b10110000,
-        0b10111000,
+
+    expected_outputs = [
+        
     ]
     
-    for i in range(256):
-        dut.ui_in.value = i
+    for i in range(len(stop_patterns)):
+        dut.ui_in.value = stop_patterns[i]
         await RisingEdge(dut.clk)  # Cycle 1 post-reset
         await RisingEdge(dut.clk)  # Cycle 2 post-reset
         await RisingEdge(dut.clk)  # Cycle 3 just in case
-        cocotb.log.info(f"layer3 [7:0]:{dut.uo_out.value.binstr}")
-        # cocotb.log.info(f"expected value: {bin(expected_outputs[i])}, actual value: {bin(dut.uo_out.value[4:7])}")
-        # assert int(dut.uo_out.value[4:7]) == expected_outputs[i], f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output[i])}"
+        # cocotb.log.info(f"layer3 [7:0]:{dut.uo_out.value.binstr}")
+        assert int(dut.uo_out.value[4:7]) == 0b00000001, f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output[i])}"
 
 async def test_weight_loading(dut):
     """Test dynamic weight loading through bidirectional pins"""
