@@ -90,7 +90,8 @@ generate
 // ----------------- Threshold Activation -------------------------
 wire [7:0] neuron_out1;
   for (i = 0; i < 8; i = i + 1) begin : activation1
-    assign neuron_out1[i] = (sums[i] >= thresholds);
+    if (i == 7) assign neuron_out1[i] = (sums[i] >= thresholds_2);
+    else assign neuron_out1[i] = (sums[i] >= thresholds);
   end
 endgenerate
 
@@ -121,7 +122,8 @@ generate
 // ----------------- Threshold Activation -------------------------  just edited out generate, put back if needed
 wire [3:0] neuron_out3;
   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation3
-    assign neuron_out3[k-8] = (sums[k] >= thresholds);
+    if (k == 11) assign neuron_out3[k-8] = (sums[k] >= thresholds_2);
+    else assign neuron_out3[k-8] = (sums[k] >= thresholds);
   end
 endgenerate
 
