@@ -22,7 +22,8 @@ module tt_um_BNN (
 // --------------- Constants set for BNN ------------------------
 localparam NUM_NEURONS = 12;
 localparam NUM_WEIGHTS = 4;
-localparam thresholds = 8;
+localparam thresholds = 7;
+localparam thresholds_2 = 6;
 
 wire reset = ~rst_n; // use active-high reset
 
@@ -43,19 +44,19 @@ always @(posedge clk or posedge reset) begin
   // constant weight loading
   if (reset) begin
     // goes from 7th -> 0th bit
-    weights[0] <= 8'b10101101;
-    weights[1] <= 8'b00001010;
-    weights[2] <= 8'b01111100;
-    weights[3] <= 8'b00010000;
-    weights[4] <= 8'b11101110;
-    weights[5] <= 8'b00001011;
-    weights[6] <= 8'b00110110;
-    weights[7] <= 8'b00111110;
+    weights[0] <= 8'b11100000;
+    weights[1] <= 8'b01110000;
+    weights[2] <= 8'b00111000;
+    weights[3] <= 8'b00011100;
+    weights[4] <= 8'b00001110;
+    weights[5] <= 8'b00000111;
+    weights[6] <= 8'b11111111;
+    weights[7] <= 8'b00000000;
     // Second layer: 4 neurons
-    weights[8] <= 8'b11000101;
-    weights[9] <= 8'b10000011;
-    weights[10] <= 8'b00100011;
-    weights[11] <= 8'b00010111;
+    weights[8] <= 8'b11000000;
+    weights[9] <= 8'b00110000;
+    weights[10] <= 8'b00001100;
+    weights[11] <= 8'b10000000;
     load_state <= 0;
     temp_weight <= 8'b0000;
     bit_index <= 0;
