@@ -63,12 +63,24 @@ async def test_hardcoded_weights(dut):
     left_patterns = [
         0b00000000,  # Row 1
         0b00001000,  # Row 9
-        0b00011000,  # Row 25
-        0b10000000   # Row 129
+        0b00010000,  # Row 25
+        0b00011000,   # Row 129
+        0b00100000,
+        0b00101000,
+        0b00110000,
+        0b00111000,
+        0b10000000,
+        0b10001000,
+        0b10010000,
+        0b10011000,
+        0b10100000,
+        0b10101000,
+        0b10110000,
+        0b10111000,
     ]
     
-    for i in range(len(stop_patterns)):
-        dut.ui_in.value = stop_patterns[i]
+    for i in range(len(left_patterns)):
+        dut.ui_in.value = left_patterns[i]
         await RisingEdge(dut.clk)  # Cycle 1 post-reset
         await RisingEdge(dut.clk)  # Cycle 2 post-reset
         await RisingEdge(dut.clk)  # Cycle 3 just in case
