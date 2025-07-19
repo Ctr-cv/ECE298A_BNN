@@ -53,7 +53,7 @@ always @(posedge clk or posedge reset) begin
     weights[6] <= 8'b11111111;
     weights[7] <= 8'b00000000;
     // Second layer: 4 neurons
-    weights[8] <= 8'b00000011;
+    weights[8] <= 8'b10000011;
     weights[9] <= 8'b00001100;
     weights[10] <= 8'b00110000;
     weights[11] <= 8'b10000000;
