@@ -53,10 +53,10 @@ always @(posedge clk or posedge reset) begin
     weights[6] <= 8'b11111111;
     weights[7] <= 8'b00000000;
     // Second layer: 4 neurons
-    weights[8] <= 8'b00000011;
-    weights[9] <= 8'b00001100;
-    weights[10] <= 8'b00110000;
-    weights[11] <= 8'b11000000;
+    weights[8] <= 8'b01000011;
+    weights[9] <= 8'b01001100;
+    weights[10] <= 8'b01110000;
+    weights[11] <= 8'b10000000;
     load_state <= 0;
     temp_weight <= 8'b0000;
     bit_index <= 0;
@@ -104,7 +104,7 @@ end
 // assign uo_out[7:0] = {neuron_out1_reg[7:0]};  // 4 neuron outputs
 
 // ------------------------ Layer 2 (actual) ------------------------------
-// ------------------ XNOR-Popcount Calculation ------------------
+// ------------------ XNOR-Popcount Calculation ---------------------------
 genvar k;
 generate
   for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron3
@@ -113,7 +113,7 @@ generate
     assign sums[k] = {3'b000, (neuron_out1_reg[0] ~^ weights[k][0])} +
                      {3'b000, (neuron_out1_reg[1] ~^ weights[k][1])} +
                      {3'b000, (neuron_out1_reg[2] ~^ weights[k][2])} +
-                     {3'b000, (neuron_out1_reg[3] ~^ weights[k][3])} + 
+                     {3'b000, (neuron_out1_reg[3] ~^ weights[k][3])} +
                      {3'b000, (neuron_out1_reg[4] ~^ weights[k][4])} +
                      {3'b000, (neuron_out1_reg[5] ~^ weights[k][5])} +
                      {3'b000, (neuron_out1_reg[6] ~^ weights[k][6])} +
