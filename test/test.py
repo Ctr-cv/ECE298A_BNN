@@ -70,7 +70,7 @@ async def test_hardcoded_weights(dut):
         await RisingEdge(dut.clk)  # Cycle 1 post-reset
         await RisingEdge(dut.clk)  # Cycle 2 post-reset
         await RisingEdge(dut.clk)  # Cycle 3 just in case
-        cocotb.log.info(f"index:{i.binstr} layer3 [7:0]:{dut.uo_out.value.binstr}")
+        cocotb.log.info(f"index:{format(i, '08b')} layer3 [7:0]:{dut.uo_out.value.binstr}")
         # assert int(dut.uo_out.value[4:7]) == 0b00000001, f"Hardcoded weight test failed. Got {bin(dut.uo_out.value[4:7])}, expected {bin(expected_output[i])}"
 async def test_weight_loading(dut):
     """Test dynamic weight loading through bidirectional pins"""
