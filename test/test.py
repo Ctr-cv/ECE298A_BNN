@@ -80,7 +80,7 @@ async def test_hardcoded_weights(dut):
     ]
     
     for i in range(256):
-        dut.ui_in.value = format(i, '08b')
+        dut.ui_in.value = i
         await RisingEdge(dut.clk)  # Cycle 1 post-reset
         await RisingEdge(dut.clk)  # Cycle 2 post-reset
         await RisingEdge(dut.clk)  # Cycle 3 just in case
