@@ -12,7 +12,9 @@
 module tt_um_BNN (
     input  wire [7:0] ui_in,    // Input: 8-bit ui_in, [7:0]
     output wire [7:0] uo_out,   // Output: 4 neuron output + 2 debug bits, [7:2]
+    /* verilator lint_off UNUSEDSIGNAL */
     input  wire [7:0] uio_in,   // Bir-Inputs: 4-bit weight [7:4], 1-bit load_en [3]
+    /* verilator lint_on UNUSEDSIGNAL */
     output wire [7:0] uio_out,  // Bir-Outputs: Unused
     output wire [7:0] uio_oe,   // Bir-IO enable, not used
     input  wire       ena,      // Enable
@@ -22,7 +24,7 @@ module tt_um_BNN (
 // --------------- Constants set for BNN ------------------------
 localparam NUM_NEURONS = 12;
 localparam NUM_WEIGHTS = 4;
-localparam thresholds = 7;
+localparam thresholds = 6;
 localparam thresholds_2 = 7;
 
 wire reset = ~rst_n; // use active-high reset
@@ -32,7 +34,7 @@ wire reset = ~rst_n; // use active-high reset
 // 8-bits weight per 4 neurons, declared here
 reg [2*NUM_WEIGHTS-1:0] weights [0:NUM_NEURONS-1]; // neuron 0 takes [7:0] weights at index 0, and etc.
 
-reg [4:0] load_state; // Used for weight-loading to indicate # neuron.
+reg [3:0] load_state; // Used for weight-loading to indicate # neuron.
 wire [3:0] sums [0:NUM_NEURONS-1];  // Used for XNOR-Popcount 4-bit sums
 
 reg [3:0] temp_weight; // used as a buffer for weight loading
@@ -58,7 +60,7 @@ always @(posedge clk or posedge reset) begin
     weights[10] <= 8'b00110000;
     weights[11] <= 8'b10000000;
     load_state <= 0;
-    temp_weight <= 8'b0000;
+    temp_weight <= 4'b0000;
     bit_index <= 0;
   end else if (ena && uio_in[3]) begin  // Use bidir pin to trigger loading
     if (bit_index == 0) begin
@@ -90,8 +92,12 @@ generate
 // ----------------- Threshold Activation -------------------------
 wire [7:0] neuron_out1;
   for (i = 0; i < 8; i = i + 1) begin : activation1
-    if (i == 7) assign neuron_out1[i] = (sums[i] >= thresholds_2);
-    else assign neuron_out1[i] = (sums[i] >= thresholds);
+    if (i == 7) begin : special_case
+      assign neuron_out1[i] = (sums[i] >= thresholds_2);
+    end
+    else begin: default_case
+      assign neuron_out1[i] = (sums[i] >= thresholds);
+    end
   end
 endgenerate
 
@@ -107,7 +113,7 @@ end
 // ------------------ XNOR-Popcount Calculation ---------------------------
 genvar k;
 generate
-  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron3
+  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron2
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
     assign sums[k] = {3'b000, (neuron_out1_reg[0] ~^ weights[k][0])} +
@@ -121,9 +127,13 @@ generate
   end
 // ----------------- Threshold Activation -------------------------  just edited out generate, put back if needed
 wire [3:0] neuron_out3;
-  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation3
-    if (k == 11) assign neuron_out3[k-8] = (sums[k] >= thresholds_2);
-    else assign neuron_out3[k-8] = (sums[k] >= thresholds);
+  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation2
+    if (i == 11) begin : special_case
+      assign neuron_out3[k-8] = (sums[k] >= thresholds_2);
+    end
+    else begin: default_case
+      assign neuron_out3[k-8] = (sums[k] >= thresholds);
+    end
   end
 endgenerate
 
