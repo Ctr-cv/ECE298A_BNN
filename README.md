@@ -92,7 +92,7 @@ The following diagram illustrates the overall architecture of the BNN ASIC. It c
 - The final classification output is provided through `uo_out[7:4]`.
 - Weight values are loaded serially into the neurons through `uio[7:4]`, controlled by `uio[3]` (`load_enable`).
 
-![Block Diagram of Program Structure](./assets/bnn_block_diagram.png)
+![Block Diagram of Program Structure](./assets/block_diagram.png)
 ---
 
 ## 3. System Architecture and Hardware Specs (Lead: Vivi)
