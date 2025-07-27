@@ -24,7 +24,7 @@ module tt_um_BNN (
 // --------------- Constants set for BNN ------------------------
 localparam NUM_NEURONS = 12;
 localparam NUM_WEIGHTS = 4;
-localparam thresholds = 6;
+localparam thresholds = 7;
 localparam thresholds_2 = 7;
 
 wire reset = ~rst_n; // use active-high reset
@@ -113,7 +113,7 @@ end
 // ------------------ XNOR-Popcount Calculation ---------------------------
 genvar k;
 generate
-  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron2
+  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : neuron3
     // XNOR each input bit with weight, then sum
     // Note, here only last 4 bits of weights are taken from weights[7:4].
     assign sums[k] = {3'b000, (neuron_out1_reg[0] ~^ weights[k][0])} +
@@ -127,8 +127,8 @@ generate
   end
 // ----------------- Threshold Activation -------------------------  just edited out generate, put back if needed
 wire [3:0] neuron_out3;
-  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation2
-    if (i == 11) begin : special_case
+  for (k = 8; k < NUM_NEURONS; k = k + 1) begin : activation3
+    if (k == 11) begin : special_case
       assign neuron_out3[k-8] = (sums[k] >= thresholds_2);
     end
     else begin: default_case
