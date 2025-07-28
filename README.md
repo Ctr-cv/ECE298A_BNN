@@ -2,36 +2,25 @@
 
 # BNN Project Documentation
 
-
-
-This documentation provides a comprehensive overview of the design, implementation, and verification of a 16-neuron Binary Neural Network (BNN) deployed on a Tiny TapeOut ASIC. The goal of the project is to construct a compact and efficient neural inference engine capable of classifying 8-bit sensor input into four distinct motion commands: left, right, forward, and stop.
-
-Each section is clearly marked with responsibilities where applicable, and includes diagrams, tables, and test strategies to ensure clarity and traceability. 
-
----
-
 ### Design Objective
 
-The objective of this project is to implement a 16-neuron Binary Neural Network (BNN) on a Tiny TapeOut ASIC platform. The network is designed to classify an 8-bit binary input, representing environmental or sensor-based signals, into one of four predefined movement categories: turn left, turn right, move forward, or stop.
+The objective of this project is to implement a 12-neuron Binary Neural Network (BNN) on a Tiny TapeOut ASIC platform. The network is designed to classify an 8-bit binary input, representing environmental or sensor-based signals, into one of four predefined movement categories: turn left, turn right, move forward, or stop.
 
-The design must operate within the hardware limitations of the Tiny TapeOut platform (approximately 7000 transistors) while achieving the following goals:
+The design is built to operate on the Tiny TapeOut platform, complying with its hardware and software limitations, while achieving the following goals.
 
 - Efficient binary computation using XNOR + popcount + threshold logic
 - Two-layer neural network: 8 neurons in the first layer and 4 in the second
 - Serial weight-loading mechanism through shared I/O pins
-- Compact resource usage (<2500 transistors total)
 - Integration with external training (Larq + TensorFlow) and verification via testbench
 
-This design is intended to demonstrate how a compact binary neural network can be deployed on minimal hardware for classification tasks.
+This design is intended to demonstrate how a compact binary neural network can be implemented with minimal hardware. Although weak right now, this design could operate at a much higher accuracy given sufficient hardware.
 
-
----
 
 ## 2. I/O Interface Specification (Lead: Vivi)
 
 ## 2.1 Input/Output Pin Description
 
-The design uses 8 input pins and 8 output pins, split into classification results and intermediate debug information. The bidirectional pins are used to load neuron weights during runtime.
+The design uses 8 input pins and 8 output pins, representing sensor data and classification outputs. The bidirectional pins are used to load neuron weights during runtime.
 
 ### Inputs: `ui_in[7:0]` (8-bit sensor input)
 
@@ -42,8 +31,8 @@ These represent obstacle sensor readings from the front 180° field of view of t
 | `ui_in[0]` | Far left (−90°)         | Obstacle detection on far left       |
 | `ui_in[1]` | Left-mid (−65°)         | Slightly left                        |
 | `ui_in[2]` | Left-center (−40°)      | Between left and center              |
-| `ui_in[3]` | Slight-left (−20°)      | Almost center, leaning left          |
-| `ui_in[4]` | Slight-right (+20°)     | Almost center, leaning right         |
+| `ui_in[3]` | Slight-left (−15°)      | Almost center, leaning left          |
+| `ui_in[4]` | Slight-right (+15°)     | Almost center, leaning right         |
 | `ui_in[5]` | Right-center (+40°)     | Between center and right             |
 | `ui_in[6]` | Right-mid (+65°)        | Slightly right                       |
 | `ui_in[7]` | Far right (+90°)        | Obstacle detection on far right      |
@@ -57,13 +46,13 @@ The 4 most significant bits represent the output classification result from the 
 | Bit Index | Movement Command | Description                                                              |
 |-----------|------------------|--------------------------------------------------------------------------|
 | `uo_out[7]` | Turn Left         | Indicates the robot should turn left to avoid right-side obstacles       |
-| `uo_out[6]` | Turn Right        | Indicates the robot should turn right to avoid left-side obstacles       |
-| `uo_out[5]` | Move Forward      | Path is clear, safe to proceed forward                                   |
+| `uo_out[6]` | Move Forward       | Path is clear, safe to proceed       |
+| `uo_out[5]` | Turn Right     | Indicates the robot should turn right to avoid left-side obstacles                                   |
 | `uo_out[4]` | Stop              | Indicates obstacles ahead; robot should stop                             |
 
-> The BNN supports **multi-action output**, meaning more than one of these bits can be high (`1`) at the same time.  
+> The BNN operates on **multi-action output**, meaning more than one of these bits can be high (`1`) at the same time.  
 > For example:
-> - If both `uo_out[7]` and `uo_out[4]` are high, the robot may **prefer to turn left**, but **stop immediately if unable to do so safely**.
+> - If both `uo_out[7]` and `uo_out[4]` are high, the robot may **turn left**, but could also **stop** if needed.
 > - If only `uo_out[5]` is high, it can proceed forward confidently.
 
 The final action logic (e.g., priority or blending behavior) can be decided downstream by the robot's movement controller based on multiple active signals.
@@ -71,7 +60,7 @@ The final action logic (e.g., priority or blending behavior) can be decided down
 
 ### Debug Outputs: `uo_out[3:0]`
 
-These bits optionally reflect intermediate neuron activations from Layer 2 (neurons 9–12) and are primarily used for simulation and testing purposes.
+These bits optionally reflect intermediate neuron activations (after layer 1, before layer 2) and are primarily used for simulation and testing purposes. 
 
 ### Bidirectional Pins: `uio[7:0]`
 
@@ -91,6 +80,8 @@ The following diagram illustrates the overall architecture of the BNN ASIC. It c
 - These outputs are passed to a second layer of 4 neurons, which further classify the result.
 - The final classification output is provided through `uo_out[7:4]`.
 - Weight values are loaded serially into the neurons through `uio[7:4]`, controlled by `uio[3]` (`load_enable`).
+
+A BNN neuron structure diagram can be found further down the documentation.
 
 ![Block Diagram of Program Structure](./assets/block_diagram.png)
 ---
@@ -166,7 +157,7 @@ The BNN supports dynamic runtime weight loading through the bidirectional pins `
 - **Control**:  
   The signal `load_enable` (connected to `uio[3]`) must be held high for the entire duration of the loading process. Since each neuron requires 2 cycles, a total of **32 clock cycles** are needed to load all 16 neurons. If `load_enable` goes low before completion, weight loading is aborted.
 
-This protocol allows weights to be reloaded as needed while minimizing I/O usage and maintaining predictable timing.
+This protocol allows weights to be reloaded as needed while minimizing I/O usage and maintaining predictable timing. See the diagram below; note that some lines were omitted.
 
 ![Diagram of BNN Architecture](./assets/neuron.png)
 
@@ -205,13 +196,13 @@ Simulation-based testing is implemented using [CocoTB](https://www.cocotb.org/),
 
 ### 5.4 Evaluation and Results
 
-- **Test Set**: 20 distinct input patterns are tested, covering all movement categories.
+- **Test Set**: 56 distinct input patterns are tested, covering all movement categories.
 - **Metrics**:
   - Classification correctness (match expected output bits)
   - Signal timing correctness (e.g., output appears one clock cycle after inputs)
   - Weight loading latency (verified to complete in 32 cycles)
 
-> All test cases pass with expected output behavior. The design meets functional correctness goals under simulation.
+> 42 of the 56 test cases pass with expected output behavior. The design meets functional correctness goals, although more improvements could be made given a larger and deeper BNN.
 
 
 ---
@@ -230,13 +221,14 @@ Simulation-based testing is implemented using [CocoTB](https://www.cocotb.org/),
 | Date        | Milestone / Work Completed                                   |
 |-------------|--------------------------------------------------------------|
 | May 17, 2025 | Finalized project theme and goal                            |
-| May 26, 2025 | Project officially started                                   |
-| June 2, 2025 | Drafted the architecture block diagram                      |
-| June 8, 2025 | Defined I/O interface, hardware specs, and testing methods  |
-| June 10–23   | Iteratively refined Verilog logic, weight-loading control   |
-| June 24, 2025 | Completed timing diagram for weight-loading process        |
-| July 1–10    | Wrote Verilog testbench scaffolding, ran functional sims    |
-| July 17, 2025 | Training and testing scripts finalized; accuracy verified  |
-
+| May 26, 2025 | Project officially started, drafted first documentation and ideas                                   |
+| June 2, 2025 | Drafted the architecture block diagram for the BNN                      |
+| June 8, 2025 | Defined I/O interface, hardware specs, and testing methods, written in documentations  |
+| June 10–23, 2025  | Iteratively refined Verilog logic, weight-loading control. Went backwards and modified structural designs to comply with hardware limits and Verilog restrictions.   |
+| June 24, 2025 | Finalized block diagram including neuron calculations and serial weight-loading. Debugged errors in Verilog codes        |
+| July 1–10, 2025    | Began testing based on Python and Cocotb, ran functional sims, debugged final linter errors and synthesis errors    |
+| July 17, 2025 | Training and testing scripts finalized, verified accuracy, resolved linter errors |
+| July 27, 2025 | Passed all GDS tests and own timing analysis through tools like OpenSTA, ready for next steps|
+| | ** Note that the repository still poses a synthesis warning on data storage with FFs. This is safe in a small BNN as the weights array don't create an overwhelming amount of FFs.|
 ---
 
