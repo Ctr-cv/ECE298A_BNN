@@ -58,10 +58,10 @@ async def test_hardcoded_weights(dut):
     ]
 
     forward_patterns = [
-        0b10000111,
-        0b10001110,
-        0b00001111,
-        0b00101110
+        0b00011101,
+        0b00011100,
+        0b00111000,
+        0b00011000
     ]
 
     left_patterns = [
