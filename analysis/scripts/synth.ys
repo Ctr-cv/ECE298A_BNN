@@ -1,0 +1,9 @@
+read_verilog src/project.v
+
+read_liberty analysis/pdk_files/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+synth -top tt_um_BNN
+dfflibmap -liberty analysis/pdk_files/sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty analysis/pdk_files/sky130_fd_sc_hd__tt_025C_1v80.lib
+
+write_verilog analysis/netlist.v
