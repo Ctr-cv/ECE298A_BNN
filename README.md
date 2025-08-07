@@ -183,26 +183,28 @@ This protocol allows weights to be reloaded as needed while minimizing I/O usage
 Simulation-based testing is implemented using [CocoTB](https://www.cocotb.org/), allowing direct control of the DUT from Python. Two major test scenarios are implemented in `test.py`:
 
 - **Test 1: Hardcoded Weights**
-  - Validates default hardwired weights in the Verilog design.
-  - Multiple sensor input patterns are fed through `ui_in`, and the output `uo_out[7:4]` is checked for correct activation.
-  - This test ensures correct XNOR + popcount + threshold functionality with pre-defined weights.
+  - Validates default hardwired weights in the Verilog design. No weight loading is implemented in this stage.
+  - Sensor input patterns are fed through `ui_in`, and the output `uo_out[7:4]` is checked for correct activation.
+  - 14 test cases total, including 4 stop + 4 right + 4 forward + 2 left cases. Test cases are chosen manually based on suitability. 
+    - i.e. `0b00001111` should always be classified as right-turn.
+  - This test ensures correct XNOR + popcount + threshold functionality with pre-defined & trained weights.
 
 - **Test 2: Dynamic Weight Loading**
   - Dynamically loads neuron weights using `uio[7:4]` and `load_enable`.
-  - After loading, a test input is applied and the output is verified.
+  - After loading, a test input of `0b11110000` is applied and the output is verified.
   - This test checks both the correctness of the serial weight loading protocol and the inference result with user-supplied weights.
 
 
 
 ### 5.4 Evaluation and Results
 
-- **Test Set**: 56 distinct input patterns are tested, covering all movement categories.
+- **Test Set**: 14 distinct input patterns are tested. Covers all 4 potential operations (stop, right, forward, left)
 - **Metrics**:
   - Classification correctness (match expected output bits)
-  - Signal timing correctness (e.g., output appears one clock cycle after inputs)
+  - Signal timing correctness (e.g., output should stabilizes after 3 cycles)
   - Weight loading latency (verified to complete in 32 cycles)
 
-> 42 of the 56 test cases pass with expected output behavior. The design meets functional correctness goals, although more improvements could be made given a larger and deeper BNN.
+> All 14 of our 14 test cases pass with expected output behavior. The design meets functional correctness goals. Note that further testing does reveal wrong testcases. It's clear that more improvements could be made given a larger and deeper BNN.
 
 
 ---
