@@ -10,7 +10,7 @@
 `default_nettype none
 
 module tt_um_BNN (
-    input  wire [7:0] ui_in,    // Input: 8-bit ui_in, [7:0]
+    input  wire [7:0] ui_in,    // Input: 8-bit ui_in, [7:0] hihi
     output wire [7:0] uo_out,   // Output: 4 neuron output + 2 debug bits, [7:2]
     /* verilator lint_off UNUSEDSIGNAL */
     input  wire [7:0] uio_in,   // Bir-Inputs: 4-bit weight [7:4], 1-bit load_en [3]
